@@ -1,68 +1,23 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const customerSchema = new mongoose.Schema(
-    {
-        identifier: { type: String, required: true },
-        botCode: { type: String, required: true },
+const CustomerSchema = new mongoose.Schema({
+    identifier: { type: String, required: true },
+    botCode: { type: String, required: true, index: true },
 
-        // Thông tin profile
-        profile: {
-            name: String,
-            email: String,
-            phone: String,
-            lastActive: { type: Date, default: Date.now },
-            firstSeen: { type: Date, default: Date.now },
-            lastInterest: Date,
-            lastSentiment: String,
-        },
-
-        // Các fields động được thu thập
-        collectedFields: [
-            {
-                fieldName: String,
-                fieldValue: String,
-                source: String, // 'user_provided', 'inferred', 'system', 'auto_collected'
-                confidence: { type: Number, default: 1 },
-                lastUpdated: { type: Date, default: Date.now },
-                usageCount: { type: Number, default: 0 },
-            },
-        ],
-
-        // Lead scoring cho bán hàng
-        leadScore: { type: Number, default: 0 },
-        leadStatus: {
-            type: String,
-            enum: ["new", "cold", "warm", "hot", "customer"],
-            default: "new",
-        },
-
-        // Phân loại khách hàng
-        segment: String,
-        tags: [String],
-
-        // Preferences và behavior
-        preferences: {
-            communicationStyle: { type: String, default: "friendly" },
-            language: { type: String, default: "vi" },
-            responseSpeed: { type: String, default: "normal" },
-        },
-
-        // Thống kê tương tác
-        stats: {
-            totalMessages: { type: Number, default: 0 },
-            lastSession: Date,
-            sessionCount: { type: Number, default: 1 },
-            avgResponseTime: Number,
-            satisfactionScore: Number,
-        },
+    // ĐÂY LÀ TRÍ NHỚ DÀI HẠN (Long-term Memory)
+    // VD: { "ten": "Lan", "thai_ky": "tuan_12", "so_thich": "nhac_thien" }
+    attributes: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
+        default: {}
     },
-    {
-        timestamps: true,
-    }
-);
 
-customerSchema.index({ identifier: 1, botCode: 1 }, { unique: true });
-customerSchema.index({ leadScore: -1 });
-customerSchema.index({ "profile.lastActive": -1 });
+    // Metadata quản lý
+    lastActiveAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now }
+});
 
-module.exports = mongoose.model("_Customer", customerSchema);
+// Index tìm kiếm nhanh khách hàng của bot cụ thể
+CustomerSchema.index({ identifier: 1, botCode: 1 }, { unique: true });
+
+module.exports = mongoose.model('_Customer', CustomerSchema);

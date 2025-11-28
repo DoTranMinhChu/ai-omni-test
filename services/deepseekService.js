@@ -34,5 +34,5 @@ class DeepseekService {
     }
   }
 }
-
-module.exports = DeepseekService;
+const deepseekService = new DeepseekService(process.env.DEEPSEEK_API_KEY)
+module.exports = deepseekService;

@@ -1,26 +1,27 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
-const connectDB = require("./db");
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+const adminRoutes = require('./routes/adminRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+app.use(bodyParser.json());
 
-// Kết nối database
-connectDB();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ MongoDB Connected'))
+    .catch(err => console.error('❌ DB Connection Error:', err));
 
 // Routes
-app.use("/api/bots", require("./routes/bots"));
-app.use("/api/chat", require("./routes/chat"));
-app.use("/api/bot-generator", require("./routes/bot-generator")); // Thêm dòng này
+app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
