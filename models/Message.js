@@ -10,7 +10,7 @@ const MessageSchema = new mongoose.Schema({
         required: true 
     },
     
-    content: { type: String, required: true },
+    content: { type: String },
     
     // Nếu là tin nhắn của Bot, có thể lưu thêm metadata (ví dụ: data vừa trích xuất được)
     metadata: { type: Object, default: {} },

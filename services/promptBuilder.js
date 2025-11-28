@@ -32,7 +32,7 @@ class PromptBuilder {
         ${fieldsToExtract}
 
         === ĐỊNH DẠNG TRẢ LỜI ===
-        1. Trả lời đúng giọng điệu đã yêu cầu.
+        1. Trả lời đúng giọng điệu đã yêu cầu, không được bỏ trống câu trả lời.
         2. Nếu thu thập được thông tin mới, thêm vào cuối câu trả lời theo định dạng:
            |||DATA_START||| { "key": "value" } |||DATA_END|||
         `;

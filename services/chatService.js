@@ -92,6 +92,7 @@ class ChatService {
     }
 
     parseResponse(rawText) {
+
         // Logic tách JSON giữ nguyên như cũ
         const separatorStart = "|||DATA_START|||";
         const separatorEnd = "|||DATA_END|||";
