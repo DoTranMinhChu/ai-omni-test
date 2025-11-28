@@ -10,11 +10,9 @@
 
     <style>
         :root {
-            /* Màu sắc & Biến dùng chung */
             --primary: #6366f1;
             --primary-grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             --primary-light: #e0e7ff;
-            /* Mới thêm cho hiệu ứng hover/active */
             --secondary-grad: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
             --bg-body: #f1f5f9;
             --surface: #ffffff;
@@ -40,7 +38,7 @@
             overflow: hidden;
         }
 
-        /* === UTILS (Giữ nguyên) === */
+        /* UTILS */
         .hidden {
             display: none !important;
         }
@@ -61,6 +59,14 @@
             justify-content: space-between;
         }
 
+        .justify-center {
+            justify-content: center;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
         .gap-2 {
             gap: 0.5rem;
         }
@@ -69,9 +75,9 @@
             gap: 1rem;
         }
 
-        /* === BUTTONS (Giữ nguyên) === */
+        /* BUTTONS */
         .btn {
-            padding: 8px 16px;
+            padding: 10px 16px;
             border-radius: 8px;
             border: none;
             font-weight: 600;
@@ -79,6 +85,7 @@
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             font-size: 0.9rem;
         }
@@ -99,11 +106,6 @@
             color: var(--text-main);
         }
 
-        .btn-danger {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-
         .btn-ghost {
             background: transparent;
             color: var(--text-light);
@@ -114,7 +116,6 @@
         }
 
         .btn-icon {
-            /* Mới thêm cho Chat */
             width: 36px;
             height: 36px;
             display: flex;
@@ -134,8 +135,8 @@
             transform: translateY(-1px);
         }
 
-        /* === WELCOME SCREEN (Giữ nguyên) === */
-        #role-screen {
+        /* SCREENS BACKGROUND */
+        .dark-screen {
             height: 100vh;
             background: radial-gradient(circle at center, #1e1b4b, #0f172a);
             display: flex;
@@ -145,6 +146,7 @@
             color: white;
         }
 
+        /* ROLE CARD */
         .role-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -163,7 +165,25 @@
             border-color: var(--primary);
         }
 
-        /* === ADMIN LAYOUT (Giữ nguyên) === */
+        /* LOGIN BOX */
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            color: var(--text-main);
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        /* LAYOUTS */
         .app-layout {
             display: flex;
             height: 100vh;
@@ -255,7 +275,7 @@
             justify-content: flex-end;
         }
 
-        /* === MODALS (Giữ nguyên) === */
+        /* MODALS */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -303,7 +323,7 @@
             }
         }
 
-        /* === TABS & FORMS (Giữ nguyên) === */
+        /* TABS & FORMS */
         .tabs {
             display: flex;
             gap: 16px;
@@ -356,7 +376,14 @@
             font-family: monospace;
         }
 
-        /* === KNOWLEDGE & CUSTOMER TABLES (Giữ nguyên) === */
+        .memory-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        /* TABLES */
         .knowledge-item {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -412,11 +439,7 @@
             margin: 2px;
         }
 
-        /* ========================================= */
-        /* === NEW CHAT UI (RESPONSIVE UPGRADE)  === */
-        /* ========================================= */
-
-        /* Sidebar Chat riêng biệt */
+        /* CHAT UI */
         .chat-sidebar {
             width: 320px;
             background: var(--surface);
@@ -426,10 +449,12 @@
             padding: 20px;
             z-index: 10;
             transition: transform 0.3s ease;
+            position: relative;
         }
 
         .sidebar-header {
             margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
         .brand {
@@ -469,12 +494,15 @@
             color: var(--text-light);
             font-weight: 600;
             margin: 20px 0 10px 0;
+            flex-shrink: 0;
         }
 
         #cust-bot-list {
             flex: 1;
             overflow-y: auto;
             scrollbar-width: thin;
+            min-height: 0;
+            position: relative;
         }
 
         .bot-list-item {
@@ -528,13 +556,13 @@
             align-items: center;
             gap: 8px;
             font-weight: 500;
+            flex-shrink: 0;
         }
 
         .btn-back-sidebar:hover {
             color: var(--text-main);
         }
 
-        /* Khu vực Chat Chính */
         .chat-area {
             flex: 1;
             display: flex;
@@ -553,6 +581,7 @@
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             z-index: 5;
+            flex-shrink: 0;
         }
 
         .chat-header-info {
@@ -568,11 +597,6 @@
             border-radius: 50%;
             display: inline-block;
             margin-right: 4px;
-        }
-
-        .status-text {
-            font-size: 0.8rem;
-            color: var(--text-light);
         }
 
         .chat-messages {
@@ -636,6 +660,7 @@
             padding: 20px;
             background: white;
             border-top: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .input-wrapper {
@@ -703,15 +728,12 @@
             color: var(--border);
         }
 
-        /* Mobile Back Button */
         .mobile-back-btn {
             display: none;
         }
 
-        /* === RESPONSIVE MOBILE === */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-
-            /* Sidebar full screen */
             #customer-app .chat-sidebar {
                 width: 100%;
                 height: 100%;
@@ -721,12 +743,10 @@
                 z-index: 20;
             }
 
-            /* Ẩn Sidebar khi đang chat */
             #customer-app.chat-active .chat-sidebar {
                 transform: translateX(-100%);
             }
 
-            /* Chat Area full screen */
             .chat-area {
                 width: 100%;
                 height: 100%;
@@ -736,7 +756,6 @@
                 z-index: 10;
             }
 
-            /* Hiện nút Back */
             .mobile-back-btn {
                 display: flex;
                 align-items: center;
@@ -769,7 +788,7 @@
 <body>
 
     <!-- 1. MÀN HÌNH CHỌN VAI TRÒ -->
-    <div id="role-screen">
+    <div id="role-screen" class="dark-screen">
         <h1
             style="font-size: 3rem; font-weight: 800; margin-bottom: 40px; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             AI OMNI</h1>
@@ -787,7 +806,26 @@
         </div>
     </div>
 
-    <!-- 2. GIAO DIỆN ADMIN -->
+    <!-- 1.5. MÀN HÌNH ĐĂNG NHẬP ADMIN (MỚI) -->
+    <div id="admin-login-screen" class="dark-screen hidden">
+        <div class="login-card">
+            <div class="login-title"><i class="fa-solid fa-lock"></i> Đăng nhập Admin</div>
+
+            <div class="form-group">
+                <label class="form-label">Tài khoản</label>
+                <input type="text" id="login-user" class="form-input" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" id="login-pass" class="form-input" placeholder="••••••">
+            </div>
+
+            <button class="btn btn-primary w-full" onclick="submitLogin()">Đăng nhập</button>
+            <button class="btn btn-ghost w-full" onclick="logout()" style="margin-top: 10px;">Quay lại</button>
+        </div>
+    </div>
+
+    <!-- 2. GIAO DIỆN ADMIN (DASHBOARD) -->
     <div id="admin-app" class="app-layout hidden">
         <div class="sidebar">
             <h2 style="color: var(--primary); margin-bottom: 30px;"><i class="fa-solid fa-cube"></i> Admin Panel</h2>
@@ -801,7 +839,7 @@
         <div class="main-content">
             <div class="top-bar">
                 <h3>Danh sách Bot hoạt động</h3>
-                <span id="admin-status" style="font-size: 0.9rem; color: var(--text-light);">Ready</span>
+                <span id="admin-status" style="font-size: 0.9rem; color: var(--text-light);">Admin Logged In</span>
             </div>
             <div class="grid-container" id="bot-grid">
                 <!-- Bot cards inserted here -->
@@ -809,7 +847,7 @@
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN KHÁCH HÀNG (Đã cập nhật cấu trúc) -->
+    <!-- 3. GIAO DIỆN KHÁCH HÀNG -->
     <div id="customer-app" class="app-layout hidden">
         <!-- Sidebar -->
         <div class="chat-sidebar">
@@ -889,49 +927,40 @@
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Tabs Creator Mode -->
                 <div class="tabs" id="create-mode-tabs">
                     <div class="tab-item active" onclick="switchCreateTab('manual')" id="tab-manual">Thủ Công (Manual)
                     </div>
                     <div class="tab-item" onclick="switchCreateTab('auto')" id="tab-auto">✨ AI Auto-Generate</div>
                 </div>
+                <input type="hidden" id="bot-id">
 
-                <input type="hidden" id="bot-id"> <!-- ID Bot nếu đang Edit -->
-
-                <!-- FORM: AUTO GENERATE -->
+                <!-- AUTO -->
                 <div id="form-auto" class="hidden">
                     <div class="form-group">
-                        <label class="form-label">Mô tả ý tưởng Bot (AI sẽ làm phần còn lại)</label>
+                        <label class="form-label">Mô tả ý tưởng Bot</label>
                         <textarea id="auto-desc" class="form-input"
-                            placeholder="VD: Bot chuyên gia dinh dưỡng, tính cách vui vẻ, chuyên tư vấn giảm cân..."></textarea>
+                            placeholder="VD: Bot chuyên gia dinh dưỡng..."></textarea>
                     </div>
                     <div class="flex gap-4">
-                        <div class="form-group" style="flex:1">
-                            <label class="form-label">Tên Bot (Tùy chọn)</label>
-                            <input type="text" id="auto-name" class="form-input"
-                                placeholder="Để trống nếu muốn AI đặt tên">
+                        <div class="form-group w-full">
+                            <label class="form-label">Tên Bot</label>
+                            <input type="text" id="auto-name" class="form-input">
                         </div>
-                        <div class="form-group" style="flex:1">
-                            <label class="form-label">Mã Code (Tùy chọn)</label>
-                            <input type="text" id="auto-code" class="form-input"
-                                placeholder="Để trống nếu muốn AI đặt mã">
+                        <div class="form-group w-full">
+                            <label class="form-label">Mã Code</label>
+                            <input type="text" id="auto-code" class="form-input">
                         </div>
-                    </div>
-                    <div
-                        style="background: #eff6ff; padding: 12px; border-radius: 8px; font-size: 0.9rem; color: #1e40af; margin-bottom: 20px;">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI sẽ tự động viết System Prompt, cấu hình Giọng
-                        điệu (Tone), và các trường cần ghi nhớ.
                     </div>
                 </div>
 
-                <!-- FORM: MANUAL -->
+                <!-- MANUAL -->
                 <div id="form-manual">
                     <div class="flex gap-4">
-                        <div class="form-group" style="flex:1">
+                        <div class="form-group w-full">
                             <label class="form-label">Tên Bot *</label>
                             <input type="text" id="manual-name" class="form-input">
                         </div>
-                        <div class="form-group" style="flex:1">
+                        <div class="form-group w-full">
                             <label class="form-label">Mã Code (Unique) *</label>
                             <input type="text" id="manual-code" class="form-input">
                         </div>
@@ -942,20 +971,29 @@
                             placeholder="Bạn là ai? Nhiệm vụ của bạn là gì?"></textarea>
                     </div>
                     <div class="flex gap-4">
-                        <div class="form-group" style="flex:1">
-                            <label class="form-label">Giọng điệu (Tone)</label>
-                            <input type="text" id="manual-tone" class="form-input"
-                                placeholder="VD: Chuyên nghiệp, Hài hước">
+                        <div class="form-group w-full">
+                            <label class="form-label">Giọng điệu</label>
+                            <input type="text" id="manual-tone" class="form-input">
                         </div>
-                        <div class="form-group" style="flex:1">
-                            <label class="form-label">Thái độ (Attitude)</label>
-                            <input type="text" id="manual-attitude" class="form-input"
-                                placeholder="VD: Tận tâm, Nghiêm khắc">
+                        <div class="form-group w-full">
+                            <label class="form-label">Thái độ</label>
+                            <input type="text" id="manual-attitude" class="form-input">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Chủ đề cấm kỵ (ngăn cách dấu phẩy)</label>
+                        <label class="form-label">Chủ đề cấm kỵ</label>
                         <input type="text" id="manual-prohibited" class="form-input">
+                    </div>
+
+                    <!-- MEMORY CONFIG -->
+                    <div class="form-group"
+                        style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="form-label" style="margin:0">Cấu hình Trí nhớ (Memory Fields)</label>
+                            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 8px;"
+                                onclick="addMemoryRow()">+ Thêm trường</button>
+                        </div>
+                        <div id="memory-container"></div>
                     </div>
                 </div>
 
@@ -967,41 +1005,34 @@
         </div>
     </div>
 
-    <!-- MODAL 2: QUẢN LÝ TRI THỨC (KNOWLEDGE) -->
+    <!-- MODAL 2: KNOWLEDGE -->
     <div id="knowledge-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
-                <h3>Quản Lý Tri Thức: <span id="k-bot-name" style="color: var(--primary);"></span></h3>
+                <h3>Tri Thức: <span id="k-bot-name" style="color: var(--primary);"></span></h3>
                 <button class="btn btn-ghost" onclick="closeModal('knowledge-modal')"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Add New -->
                 <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 10px;">Thêm Tri thức Mới</h4>
-                    <textarea id="k-new-content" class="form-input" placeholder="Nhập nội dung kiến thức..."
+                    <h4 style="margin-bottom: 10px;">Thêm Mới</h4>
+                    <textarea id="k-new-content" class="form-input" placeholder="Nội dung..."
                         style="min-height: 60px; margin-bottom: 8px;"></textarea>
-                    <input type="text" id="k-new-keywords" class="form-input" placeholder="Từ khóa (ngăn cách dấu phẩy)"
+                    <input type="text" id="k-new-keywords" class="form-input" placeholder="Từ khóa..."
                         style="margin-bottom: 8px;">
-                    <div style="text-align: right;">
-                        <button class="btn btn-primary" onclick="addKnowledge()">Thêm Mới</button>
-                    </div>
+                    <div style="text-align: right;"><button class="btn btn-primary"
+                            onclick="addKnowledge()">Thêm</button></div>
                 </div>
-
-                <!-- List -->
-                <h4 style="margin-bottom: 10px;">Danh sách Tri thức hiện có</h4>
-                <div id="knowledge-list">
-                    <!-- Items rendered here -->
-                </div>
+                <div id="knowledge-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 3: XEM KHÁCH HÀNG -->
+    <!-- MODAL 3: CUSTOMER -->
     <div id="customer-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
-                <h3>Dữ liệu Khách Hàng: <span id="c-bot-name" style="color: var(--primary);"></span></h3>
+                <h3>Khách Hàng: <span id="c-bot-name" style="color: var(--primary);"></span></h3>
                 <button class="btn btn-ghost" onclick="closeModal('customer-modal')"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
@@ -1010,13 +1041,11 @@
                     <thead>
                         <tr>
                             <th>User ID</th>
-                            <th>Lần cuối hoạt động</th>
-                            <th>Thông tin đã học (Attributes)</th>
+                            <th>Lần cuối</th>
+                            <th>Attributes</th>
                         </tr>
                     </thead>
-                    <tbody id="customer-list-body">
-                        <!-- Rows rendered here -->
-                    </tbody>
+                    <tbody id="customer-list-body"></tbody>
                 </table>
             </div>
         </div>
@@ -1026,11 +1055,34 @@
     <script>
         const API_URL = '/api';
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & LOGIN ---
         function enterAdmin() {
             document.getElementById('role-screen').classList.add('hidden');
-            document.getElementById('admin-app').classList.remove('hidden');
-            loadBotsAdmin();
+            document.getElementById('admin-login-screen').classList.remove('hidden');
+        }
+
+        async function submitLogin() {
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                if (res.ok) {
+                    // Login thành công
+                    document.getElementById('admin-login-screen').classList.add('hidden');
+                    document.getElementById('admin-app').classList.remove('hidden');
+                    loadBotsAdmin();
+                } else {
+                    alert("Sai tài khoản hoặc mật khẩu!");
+                }
+            } catch (err) {
+                alert("Lỗi kết nối server");
+            }
         }
 
         function enterCustomer() {
@@ -1041,57 +1093,50 @@
         }
 
         function logout() {
+            // Ẩn tất cả các màn hình chính
             document.getElementById('admin-app').classList.add('hidden');
             document.getElementById('customer-app').classList.add('hidden');
+            document.getElementById('admin-login-screen').classList.add('hidden');
+
+            // Hiện màn hình chọn role
             document.getElementById('role-screen').classList.remove('hidden');
+
+            // Reset input login
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
 
-        // ==========================================
-        // ADMIN: BOT MANAGEMENT
-        // ==========================================
+        // --- ADMIN FUNCTIONS ---
         async function loadBotsAdmin() {
             const grid = document.getElementById('bot-grid');
-            grid.innerHTML = '<div style="padding:20px;">Loading...</div>';
+            grid.innerHTML = 'Loading...';
             try {
                 const res = await fetch(`${API_URL}/admin/bots`);
                 const bots = await res.json();
-
                 grid.innerHTML = bots.map(bot => `
                     <div class="bot-card">
-                        <div class="bot-header">
-                            <strong>${bot.name}</strong>
-                            <span class="bot-code-badge">${bot.code}</span>
-                        </div>
-                        <div class="bot-desc">${bot.systemPrompt || 'No prompt'}</div>
+                        <div class="bot-header"><strong>${bot.name}</strong><span class="bot-code-badge">${bot.code}</span></div>
+                        <div class="bot-desc">${bot.systemPrompt || ''}</div>
                         <div class="bot-actions">
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal(${JSON.stringify(bot)})' title="Tri thức">
-                                <i class="fa-solid fa-book"></i> Tri thức
-                            </button>
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal(${JSON.stringify(bot)})' title="Khách hàng">
-                                <i class="fa-solid fa-users"></i> Data
-                            </button>
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal(${JSON.stringify(bot)})' title="Sửa">
-                                <i class="fa-solid fa-pen"></i> Sửa
-                            </button>
+                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal(${JSON.stringify(bot)})'><i class="fa-solid fa-book"></i> Data</button>
+                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal(${JSON.stringify(bot)})'><i class="fa-solid fa-users"></i> Users</button>
+                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal(${JSON.stringify(bot)})'><i class="fa-solid fa-pen"></i> Edit</button>
                         </div>
                     </div>
                 `).join('');
-            } catch (err) {
-                grid.innerHTML = `<div style="color:red">Error: ${err.message}</div>`;
-            }
+            } catch (e) { grid.innerHTML = 'Error'; }
         }
 
-        // --- CREATE / EDIT BOT LOGIC ---
+        // CREATE / EDIT BOT
         let isEditMode = false;
-
         function openCreateBotModal() {
             isEditMode = false;
             document.getElementById('bot-modal-title').innerText = "Tạo Bot Mới";
-            document.getElementById('create-mode-tabs').classList.remove('hidden'); // Hiện tabs chọn Manual/Auto
+            document.getElementById('create-mode-tabs').classList.remove('hidden');
             switchCreateTab('manual');
             clearBotForm();
             document.getElementById('bot-modal').classList.remove('hidden');
@@ -1099,11 +1144,10 @@
 
         function openEditBotModal(bot) {
             isEditMode = true;
-            document.getElementById('bot-modal-title').innerText = "Chỉnh Sửa Bot";
-            document.getElementById('create-mode-tabs').classList.add('hidden'); // Ẩn tab Auto khi Edit
-            switchCreateTab('manual'); // Luôn hiện form manual để edit
+            document.getElementById('bot-modal-title').innerText = "Sửa Bot";
+            document.getElementById('create-mode-tabs').classList.add('hidden');
+            switchCreateTab('manual');
 
-            // Fill Data
             document.getElementById('bot-id').value = bot._id;
             document.getElementById('manual-name').value = bot.name;
             document.getElementById('manual-code').value = bot.code;
@@ -1112,13 +1156,16 @@
             document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || '';
             document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || '';
 
+            const memContainer = document.getElementById('memory-container');
+            memContainer.innerHTML = '';
+            if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type));
+
             document.getElementById('bot-modal').classList.remove('hidden');
         }
 
         function switchCreateTab(mode) {
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${mode}`).classList.add('active');
-
             if (mode === 'manual') {
                 document.getElementById('form-manual').classList.remove('hidden');
                 document.getElementById('form-auto').classList.add('hidden');
@@ -1128,35 +1175,55 @@
             }
         }
 
+        function addMemoryRow(key = '', desc = '', type = 'string') {
+            const container = document.getElementById('memory-container');
+            const id = 'mem-' + Date.now() + Math.random();
+            container.insertAdjacentHTML('beforeend', `
+                <div class="memory-row" id="${id}">
+                    <input type="text" class="form-input mem-key" placeholder="Key (vd: ten)" value="${key}">
+                    <input type="text" class="form-input mem-desc" placeholder="Mô tả" value="${desc}">
+                    <select class="form-input mem-type" style="width:100px; flex:none;">
+                        <option value="string" ${type === 'string' ? 'selected' : ''}>Text</option>
+                        <option value="number" ${type === 'number' ? 'selected' : ''}>Number</option>
+                        <option value="date" ${type === 'date' ? 'selected' : ''}>Date</option>
+                    </select>
+                    <button class="btn btn-ghost" onclick="document.getElementById('${id}').remove()" style="color:red;width:30px;padding:0;flex:none;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `);
+        }
+
         function clearBotForm() {
             document.getElementById('bot-id').value = '';
             document.querySelectorAll('#bot-modal input, #bot-modal textarea').forEach(el => el.value = '');
+            document.getElementById('memory-container').innerHTML = '';
         }
 
         async function submitBotForm() {
             const btn = document.getElementById('btn-save-bot');
-            const originalText = btn.innerText;
-            btn.innerText = "Processing...";
-            btn.disabled = true;
+            btn.innerText = "..."; btn.disabled = true;
 
             try {
-                // Case 1: Auto Generate (Create Only)
                 if (!isEditMode && !document.getElementById('form-auto').classList.contains('hidden')) {
-                    const desc = document.getElementById('auto-desc').value;
-                    const name = document.getElementById('auto-name').value;
-                    const code = document.getElementById('auto-code').value;
-
-                    if (!desc) throw new Error("Vui lòng nhập mô tả!");
-
+                    // Auto
                     await fetch(`${API_URL}/admin/bots/auto-generate`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ description: desc, name, code })
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            description: document.getElementById('auto-desc').value,
+                            name: document.getElementById('auto-name').value,
+                            code: document.getElementById('auto-code').value
+                        })
+                    });
+                } else {
+                    // Manual
+                    const memRows = document.querySelectorAll('.memory-row');
+                    const memoryConfig = [];
+                    memRows.forEach(row => {
+                        const key = row.querySelector('.mem-key').value.trim();
+                        if (key) memoryConfig.push({
+                            key, description: row.querySelector('.mem-desc').value, type: row.querySelector('.mem-type').value
+                        });
                     });
 
-                    // Case 2: Manual Create or Edit
-                } else {
-                    const id = document.getElementById('bot-id').value;
                     const payload = {
                         name: document.getElementById('manual-name').value,
                         code: document.getElementById('manual-code').value,
@@ -1164,212 +1231,110 @@
                         behaviorConfig: {
                             tone: document.getElementById('manual-tone').value,
                             attitude: document.getElementById('manual-attitude').value,
-                            prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').map(s => s.trim()).filter(s => s)
-                        }
+                            prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').filter(s => s)
+                        },
+                        memoryConfig
                     };
-
-                    const url = isEditMode ? `${API_URL}/admin/bots/${id}` : `${API_URL}/admin/bots`;
-                    const method = isEditMode ? 'PUT' : 'POST';
-
-                    const res = await fetch(url, {
-                        method: method,
+                    const id = document.getElementById('bot-id').value;
+                    await fetch(`${API_URL}/admin/bots${isEditMode ? '/' + id : ''}`, {
+                        method: isEditMode ? 'PUT' : 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-
-                    if (!res.ok) {
-                        const err = await res.json();
-                        throw new Error(err.error || "Lỗi lưu bot");
-                    }
                 }
-
-                alert("Thành công!");
                 closeModal('bot-modal');
                 loadBotsAdmin();
-
-            } catch (err) {
-                alert("Lỗi: " + err.message);
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Error"); }
+            btn.innerText = "Lưu Bot"; btn.disabled = false;
         }
 
-        // ==========================================
-        // ADMIN: KNOWLEDGE MANAGEMENT
-        // ==========================================
-        let currentKnowledgeBotCode = null;
-
-        function openKnowledgeModal(bot) {
-            currentKnowledgeBotCode = bot.code;
+        // KNOWLEDGE & CUSTOMER (Keep simple logic)
+        let currentKBot = null;
+        async function openKnowledgeModal(bot) {
+            currentKBot = bot.code;
             document.getElementById('k-bot-name').innerText = bot.name;
-            loadKnowledgeList();
+            loadKList();
             document.getElementById('knowledge-modal').classList.remove('hidden');
         }
-
-        async function loadKnowledgeList() {
+        async function loadKList() {
             const list = document.getElementById('knowledge-list');
-            list.innerHTML = 'Loading...';
-            try {
-                const res = await fetch(`${API_URL}/admin/bots/${currentKnowledgeBotCode}/knowledge`);
-                const chunks = await res.json();
-
-                if (chunks.length === 0) {
-                    list.innerHTML = '<div style="color:gray; font-style:italic;">Chưa có tri thức nào.</div>';
-                    return;
-                }
-
-                list.innerHTML = chunks.map(k => `
-                    <div class="knowledge-item">
-                        <div class="k-content">${k.content}</div>
-                        <div class="k-keywords"><i class="fa-solid fa-tag"></i> ${k.keywords?.join(', ')}</div>
-                        <div class="k-actions">
-                            <button class="btn btn-ghost" style="font-size:0.75rem; color: red;" onclick="deleteKnowledge('${k._id}')">Xóa</button>
-                            <!-- Để đơn giản, chức năng Edit có thể làm sau hoặc dùng prompt -->
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                list.innerHTML = 'Error loading knowledge';
-            }
+            const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`);
+            const data = await res.json();
+            list.innerHTML = data.map(k => `
+                <div class="knowledge-item">
+                    <div class="k-content">${k.content}</div>
+                    <div class="k-keywords">${k.keywords?.join(', ')}</div>
+                    <div class="k-actions"><button class="btn btn-ghost" style="color:red;font-size:0.75rem" onclick="delK('${k._id}')">Xóa</button></div>
+                </div>
+            `).join('');
         }
-
         async function addKnowledge() {
-            const content = document.getElementById('k-new-content').value;
-            const keywords = document.getElementById('k-new-keywords').value;
-
-            if (!content) return alert("Nội dung không được trống");
-
-            try {
-                await fetch(`${API_URL}/admin/bots/${currentKnowledgeBotCode}/knowledge`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: content,
-                        keywords: keywords.split(',').map(s => s.trim()).filter(s => s)
-                    })
-                });
-
-                // Reset inputs & reload
-                document.getElementById('k-new-content').value = '';
-                document.getElementById('k-new-keywords').value = '';
-                loadKnowledgeList();
-
-            } catch (err) {
-                alert("Lỗi thêm tri thức: " + err.message);
-            }
+            await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: document.getElementById('k-new-content').value,
+                    keywords: document.getElementById('k-new-keywords').value.split(',')
+                })
+            });
+            document.getElementById('k-new-content').value = '';
+            loadKList();
         }
-
-        async function deleteKnowledge(id) {
-            if (!confirm("Bạn chắc chắn muốn xóa?")) return;
-            try {
+        async function delK(id) {
+            if (confirm("Xóa?")) {
                 await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' });
-                loadKnowledgeList();
-            } catch (err) {
-                alert("Lỗi xóa: " + err.message);
+                loadKList();
             }
         }
 
-        // ==========================================
-        // ADMIN: CUSTOMER VIEW
-        // ==========================================
         async function openCustomerModal(bot) {
             document.getElementById('c-bot-name').innerText = bot.name;
-            const tbody = document.getElementById('customer-list-body');
-            tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+            const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`);
+            const data = await res.json();
+            document.getElementById('customer-list-body').innerHTML = data.map(c => {
+                let attr = '';
+                if (c.attributes) Object.entries(c.attributes).forEach(([k, v]) => attr += `<span class="attr-tag">${k}: ${v}</span>`);
+                return `<tr><td>${c.id}</td><td>${new Date(c.lastActive).toLocaleString()}</td><td>${attr}</td></tr>`;
+            }).join('');
             document.getElementById('customer-modal').classList.remove('hidden');
-
-            try {
-                const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`);
-                const customers = await res.json();
-
-                if (customers.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center">Chưa có khách hàng nào</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = customers.map(c => {
-                    // Render attributes tags
-                    let attrHtml = '';
-                    if (c.attributes) {
-                        for (const [key, val] of Object.entries(c.attributes)) {
-                            attrHtml += `<span class="attr-tag">${key}: ${val}</span>`;
-                        }
-                    }
-                    return `
-                        <tr>
-                            <td><strong>${c.id}</strong></td>
-                            <td style="color:gray; font-size:0.8rem">${new Date(c.lastActive).toLocaleString()}</td>
-                            <td>${attrHtml || '<span style="color:gray">Chưa có data</span>'}</td>
-                        </tr>
-                    `;
-                }).join('');
-
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="3" style="color:red">${err.message}</td></tr>`;
-            }
         }
 
-        // ==========================================
-        // CUSTOMER: CHAT LOGIC
-        // ==========================================
-        let currentBot = null;
-        let currentUserId = null;
-        let firstMsgId = null;
+        // --- CHAT CLIENT ---
+        let currentBot = null, currentUserId = null, firstMsgId = null;
 
-        function randomId() {
-            document.getElementById('cust-id').value = 'USER_' + Math.floor(Math.random() * 10000);
-        }
+        function randomId() { document.getElementById('cust-id').value = 'USER_' + Math.floor(Math.random() * 10000); }
 
         async function loadBotsCustomer() {
             const res = await fetch(`${API_URL}/admin/bots`);
             const bots = await res.json();
-            const list = document.getElementById('cust-bot-list');
-
-            list.innerHTML = bots.map(bot => `
+            document.getElementById('cust-bot-list').innerHTML = bots.map(bot => `
                 <div class="bot-list-item" onclick="selectBot('${bot.code}', '${bot.name}')" id="bot-item-${bot.code}">
-                    <div style="width:30px;height:30px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;">${bot.name[0]}</div>
-                    <div>
-                        <div style="font-weight:600;font-size:0.9rem;">${bot.name}</div>
-                        <div style="font-size:0.75rem;color:gray;">${bot.behaviorConfig?.tone || 'Trợ lý'}</div>
-                    </div>
+                    <div class="bot-avatar-small">${bot.name[0]}</div>
+                    <div><div style="font-weight:600;font-size:0.9rem;">${bot.name}</div><div style="font-size:0.75rem;color:gray;">${bot.behaviorConfig?.tone || ''}</div></div>
                 </div>
             `).join('');
         }
 
-        // --- LOGIC GIAO DIỆN MOBILE ---
-
-        // Hàm này được gọi khi User click chọn Bot (Trong function selectBot cũ)
         function selectBot(code, name) {
-            // ... (Giữ nguyên logic cũ của bạn: gán currentBot, UI active...)
             currentUserId = document.getElementById('cust-id').value;
-            if (!currentUserId) return alert("Nhập ID khách hàng trước!");
+            if (!currentUserId) return alert("Nhập ID trước!");
 
             currentBot = code;
-
-            // Cập nhật UI list
             document.querySelectorAll('.bot-list-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`bot-item-${code}`).classList.add('active');
-
-            // Cập nhật Header Chat
             document.getElementById('chat-bot-name').innerText = name;
             document.getElementById('chat-avatar').innerText = name[0];
 
-            // Enable Input
             document.getElementById('chat-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
 
-            // Load history
             loadHistory(true);
-
-            // ==> THÊM DÒNG NÀY ĐỂ CHUYỂN CẢNH TRÊN MOBILE
             document.getElementById('customer-app').classList.add('chat-active');
         }
 
-        // Hàm quay lại danh sách bot (Dành cho nút Back trên Mobile)
         function backToBotList() {
             document.getElementById('customer-app').classList.remove('chat-active');
         }
+
         async function loadHistory(reset = false) {
             const container = document.getElementById('chat-container');
             let url = `${API_URL}/chat/${currentBot}/history?userIdentifier=${currentUserId}&limit=10`;
@@ -1381,19 +1346,16 @@
 
             if (reset) {
                 container.innerHTML = '';
-                if (msgs.length === 0) container.innerHTML = '<div style="text-align:center;margin-top:50px;color:gray">Bắt đầu trò chuyện...</div>';
+                if (msgs.length === 0) container.innerHTML = '<div class="empty-chat"><i class="fa-regular fa-paper-plane"></i><h3>Bắt đầu chat</h3></div>';
             }
-
             if (msgs.length > 0) {
                 firstMsgId = msgs[0]._id;
-                const html = msgs.map(renderMessage).join('');
-                if (reset) {
-                    container.innerHTML = html;
-                    scrollToBottom();
-                } else {
-                    const oldHeight = container.scrollHeight;
+                const html = msgs.map(renderMsg).join('');
+                if (reset) { container.innerHTML = html; scrollToBottom(); }
+                else {
+                    const h = container.scrollHeight;
                     container.insertAdjacentHTML('afterbegin', html);
-                    container.scrollTop = container.scrollHeight - oldHeight;
+                    container.scrollTop = container.scrollHeight - h;
                 }
             }
         }
@@ -1406,59 +1368,36 @@
             if (!txt) return;
 
             const container = document.getElementById('chat-container');
-            // Remove empty state
-            if (container.innerText.includes('Bắt đầu trò chuyện')) container.innerHTML = '';
+            if (container.querySelector('.empty-chat')) container.innerHTML = '';
 
-            // Render User Msg
-            container.insertAdjacentHTML('beforeend', renderMessage({ role: 'user', content: txt }));
+            container.insertAdjacentHTML('beforeend', renderMsg({ role: 'user', content: txt }));
             scrollToBottom();
             input.value = '';
 
             try {
-                // Render loading
                 const loadId = 'loading-' + Date.now();
                 container.insertAdjacentHTML('beforeend', `<div id="${loadId}" class="message-row bot"><div class="msg-bubble">...</div></div>`);
                 scrollToBottom();
 
                 const res = await fetch(`${API_URL}/chat/${currentBot}/message`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userIdentifier: currentUserId, message: txt })
                 });
                 const data = await res.json();
-
                 document.getElementById(loadId).remove();
-                container.insertAdjacentHTML('beforeend', renderMessage({
-                    role: 'assistant',
-                    content: data.reply,
-                    metadata: data.captured_data
-                }));
+                container.insertAdjacentHTML('beforeend', renderMsg({ role: 'assistant', content: data.reply, metadata: data.captured_data }));
                 scrollToBottom();
-            } catch (err) {
-                alert("Lỗi gửi tin");
-            }
+            } catch (e) { alert("Error"); }
         }
 
-        function renderMessage(msg) {
+        function renderMsg(msg) {
             const isUser = msg.role === 'user';
-            let metaHtml = '';
-
-            // Check memory
-            if (msg.metadata && Object.keys(msg.metadata).length > 0) {
+            let meta = '';
+            if (!isUser && msg.metadata) {
                 const data = msg.metadata.extractedData || msg.metadata;
-                if (Object.keys(data).length > 0) {
-                    metaHtml = `<div class="memory-badge"><i class="fa-solid fa-brain"></i> Learned: ${JSON.stringify(data)}</div>`;
-                }
+                if (Object.keys(data).length) meta = `<div class="memory-badge"><i class="fa-solid fa-brain"></i> ${JSON.stringify(data)}</div>`;
             }
-
-            return `
-                <div class="message-row ${isUser ? 'user' : 'bot'}">
-                    <div class="msg-bubble">
-                        ${msg.content.replace(/\n/g, '<br>')}
-                        ${metaHtml}
-                    </div>
-                </div>
-            `;
+            return `<div class="message-row ${isUser ? 'user' : 'bot'}"><div class="msg-bubble">${msg.content.replace(/\n/g, '<br>')}${meta}</div></div>`;
         }
 
         function scrollToBottom() {

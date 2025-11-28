@@ -267,4 +267,27 @@ router.delete('/bots/:botCode/knowledge/all', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// ... các dòng require cũ ...
+
+// [POST] Đăng nhập Admin (Simple Hardcoded)
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Kiểm tra tài khoản cứng
+    if (username === 'admin' && password === '123123123') {
+        return res.json({
+            success: true,
+            message: 'Đăng nhập thành công',
+            token: 'admin-fake-token-' + Date.now() // Token giả lập
+        });
+    }
+
+    return res.status(401).json({
+        success: false,
+        error: 'Sai tài khoản hoặc mật khẩu'
+    });
+});
+
+// ... các route còn lại (GET /bots, POST /bots...) giữ nguyên ...
 module.exports = router;
