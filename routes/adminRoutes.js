@@ -4,10 +4,11 @@ const Bot = require('../models/Bot');
 const Customer = require('../models/Customer');
 const KnowledgeChunk = require('../models/KnowledgeChunk');
 const botGenerator = require('../services/botGenerator');
-
+const ImageTemplate = require('../models/ImageTemplate')
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để xử lý nhanh
 const fileKnowledgeService = require('../services/fileKnowledgeService');
+const geminiService = require('../services/geminiService')
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -302,7 +303,7 @@ router.post('/bots/:botCode/knowledge/upload', upload.single('file'), async (req
 
         // 1. Đọc text từ file
         const rawText = await fileKnowledgeService.extractTextFromFile(req.file);
-    
+
         // 2. Dùng AI phân tích thành Chunks
         const chunks = await fileKnowledgeService.generateChunksFromText(rawText);
 
@@ -346,5 +347,62 @@ router.post('/bots/:botCode/knowledge/bulk', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// 1. Tạo Template (Body: { type: 'AUTO'/'MANUAL', ... })
+router.post('/image-template', async (req, res) => {
+    try {
+        const { type, templateCode, description, manualData } = req.body;
+        // type: 'MANUAL' | 'AUTO'
+
+        let newTemplateData = {};
+
+        if (type === 'AUTO') {
+            // Case 1: AI tự nghĩ ra cấu trúc dựa trên mô tả
+            if (!description) return res.status(400).json({ error: 'Cần mô tả cho AI' });
+
+            const aiConfig = await geminiService.autoGenerateTemplateConfig(description);
+
+            newTemplateData = {
+                templateCode: templateCode, // Admin vẫn phải đặt mã code
+                templateName: aiConfig.templateName,
+                basePrompt: aiConfig.basePrompt,
+                variables: aiConfig.variables,
+                description: `Auto-generated from: ${description}`,
+                createdBy: 'AI'
+            };
+
+        } else {
+            // Case 2: Tạo thủ công
+            if (!manualData) return res.status(400).json({ error: 'Thiếu dữ liệu thủ công' });
+
+            newTemplateData = {
+                templateCode: templateCode,
+                templateName: manualData.templateName,
+                basePrompt: manualData.basePrompt,
+                variables: manualData.variables,
+                description: manualData.description || 'Manual creation',
+                createdBy: 'ADMIN'
+            };
+        }
+
+        // Lưu vào DB
+        const savedTemplate = await ImageTemplate.create(newTemplateData);
+
+        return res.status(201).json({
+            success: true,
+            message: 'Tạo template thành công',
+            data: savedTemplate
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+// 2. Lấy danh sách
+router.get('/image-template', async (req, res) => {
+    const templates = await ImageTemplate.find();
+    res.json(templates);
 });
 module.exports = router;

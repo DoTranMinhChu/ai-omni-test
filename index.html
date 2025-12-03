@@ -36,6 +36,7 @@
             color: var(--text-main);
             height: 100vh;
             overflow: hidden;
+            /* Quan trọng: Ngăn cuộn cả trang */
         }
 
         /* === UTILS === */
@@ -67,6 +68,10 @@
             width: 100%;
         }
 
+        .h-full {
+            height: 100%;
+        }
+
         .gap-2 {
             gap: 0.5rem;
         }
@@ -79,7 +84,70 @@
             margin-bottom: 0.5rem;
         }
 
-        /* === BUTTONS === */
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        /* ANIMATIONS */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            20% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 0;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-light);
+            border-radius: 50%;
+            animation: blink 1.4s infinite both;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* BUTTONS */
         .btn {
             padding: 8px 16px;
             border-radius: 8px;
@@ -144,7 +212,7 @@
             transform: translateY(-1px);
         }
 
-        /* === SCREENS BACKGROUND === */
+        /* SCREENS & CARDS */
         .dark-screen {
             height: 100vh;
             background: radial-gradient(circle at center, #1e1b4b, #0f172a);
@@ -155,7 +223,6 @@
             color: white;
         }
 
-        /* === ROLE CARD === */
         .role-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -174,7 +241,6 @@
             border-color: var(--primary);
         }
 
-        /* === LOGIN BOX === */
         .login-card {
             background: white;
             padding: 40px;
@@ -192,11 +258,12 @@
             color: var(--primary);
         }
 
-        /* === ADMIN LAYOUT === */
+        /* LAYOUT & SIDEBAR */
         .app-layout {
             display: flex;
             height: 100vh;
             width: 100%;
+            overflow: hidden;
         }
 
         .sidebar {
@@ -206,6 +273,9 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
+            z-index: 20;
+            height: 100%;
+            flex-shrink: 0;
         }
 
         .main-content {
@@ -214,6 +284,8 @@
             flex-direction: column;
             overflow: hidden;
             background: #f8fafc;
+            position: relative;
+            height: 100%;
         }
 
         .top-bar {
@@ -227,37 +299,91 @@
             flex-shrink: 0;
         }
 
+        /* SIDEBAR MENU */
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            transition: 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .menu-item.active {
+            background: #e0e7ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* GRID CARDS */
         .grid-container {
             padding: 24px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             overflow-y: auto;
+            height: 100%;
         }
 
-        .bot-card {
+        .card {
             background: var(--surface);
             border-radius: var(--radius);
             padding: 20px;
             border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            transition: 0.2s;
             box-shadow: var(--shadow);
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
-        .bot-card:hover {
+        .card:hover {
+            transform: translateY(-3px);
             border-color: var(--primary);
-            transform: translateY(-2px);
         }
 
-        .bot-header {
+        .card-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .bot-code-badge {
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.6em;
+            flex: 1;
+        }
+
+        .card-actions {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .badge {
             font-size: 0.75rem;
             background: #e0e7ff;
             color: var(--primary);
@@ -266,94 +392,7 @@
             font-weight: 600;
         }
 
-        .bot-desc {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 16px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            min-height: 2.6em;
-        }
-
-        .bot-actions {
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        /* === MODALS === */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            animation: fadeIn 0.2s;
-        }
-
-        .modal {
-            background: var(--surface);
-            width: 900px;
-            max-height: 90vh;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8fafc;
-        }
-
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* === TABS & FORMS === */
-        .tabs {
-            display: flex;
-            gap: 16px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .tab-item {
-            padding: 8px 0;
-            cursor: pointer;
-            color: var(--text-light);
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-        }
-
-        .tab-item.active {
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
+        /* FORMS & MODALS */
         .form-group {
             margin-bottom: 16px;
         }
@@ -404,7 +443,75 @@
             border-radius: 8px;
         }
 
-        /* === KNOWLEDGE & CUSTOMER TABLES === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s;
+        }
+
+        .modal {
+            background: var(--surface);
+            width: 850px;
+            max-height: 90vh;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .tab-item {
+            padding: 8px 0;
+            cursor: pointer;
+            color: var(--text-light);
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab-item.active {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* TABLES */
         .knowledge-item {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -461,10 +568,9 @@
         }
 
         /* ========================================= */
-        /* === CHAT UI (FIXED LAYOUT)            === */
+        /* === CHAT UI (FIXED SCROLL & INPUT)    === */
         /* ========================================= */
 
-        /* Sidebar Chat */
         .chat-sidebar {
             width: 320px;
             background: var(--surface);
@@ -475,7 +581,8 @@
             z-index: 10;
             transition: transform 0.3s ease;
             position: relative;
-            /* Fix z-index stacking */
+            height: 100%;
+            flex-shrink: 0;
         }
 
         .sidebar-header {
@@ -523,7 +630,6 @@
             flex-shrink: 0;
         }
 
-        /* FIX: List area scrollable correctly */
         #cust-bot-list {
             flex: 1;
             overflow-y: auto;
@@ -590,13 +696,17 @@
             color: var(--text-main);
         }
 
-        /* Chat Area */
+        /* >>> KHU VỰC CHAT CHÍNH (ĐÃ FIX LỖI SCROLL) <<< */
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #ffffff;
             position: relative;
+            height: 100%;
+            /* Bắt buộc */
+            overflow: hidden;
+            /* Ngăn tràn ra ngoài */
         }
 
         .chat-top-bar {
@@ -634,7 +744,9 @@
 
         .chat-messages {
             flex: 1;
+            /* Chiếm hết khoảng trống còn lại */
             overflow-y: auto;
+            /* Scroll nội bộ */
             padding: 20px 5%;
             display: flex;
             flex-direction: column;
@@ -642,6 +754,8 @@
             background-image: radial-gradient(#6366f1 0.5px, transparent 0.5px), radial-gradient(#6366f1 0.5px, #ffffff 0.5px);
             background-size: 20px 20px;
             background-color: #f8fafc;
+            min-height: 0;
+            /* Fix flexbox scroll bug */
         }
 
         .message-row {
@@ -649,6 +763,7 @@
             gap: 12px;
             max-width: 70%;
             animation: fadeIn 0.3s ease;
+            flex-shrink: 0;
         }
 
         .message-row.user {
@@ -694,6 +809,8 @@
             background: white;
             border-top: 1px solid var(--border);
             flex-shrink: 0;
+            /* Không bao giờ bị co lại */
+            z-index: 10;
         }
 
         .input-wrapper {
@@ -704,6 +821,7 @@
             border-radius: 30px;
             border: 1px solid var(--border);
             transition: 0.2s;
+            align-items: flex-end;
         }
 
         .input-wrapper:focus-within {
@@ -719,6 +837,11 @@
             padding: 12px 20px;
             outline: none;
             font-size: 1rem;
+            resize: none;
+            max-height: 120px;
+            overflow-y: auto;
+            height: 48px;
+            line-height: 1.5;
         }
 
         #send-btn {
@@ -733,6 +856,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 2px;
         }
 
         #send-btn:hover {
@@ -761,13 +886,101 @@
             color: var(--border);
         }
 
-        /* Mobile Back Button */
         .mobile-back-btn {
             display: none;
         }
 
+        /* IMAGE GEN UI */
+        .img-gen-layout {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .img-sidebar {
+            width: 300px;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .img-preview-area {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            overflow-y: auto;
+        }
+
+        .template-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+        }
+
+        .template-item:hover {
+            border-color: var(--primary);
+            background: #f1f5f9;
+        }
+
+        .template-item.active {
+            background: #e0e7ff;
+            border-color: var(--primary);
+        }
+
+        .generated-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .prompt-box {
+            background: #1e293b;
+            color: #a5b4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 700px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
         /* === RESPONSIVE MOBILE === */
         @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 10px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .menu-item {
+                margin-bottom: 0;
+                margin-right: 10px;
+                white-space: nowrap;
+            }
+
             #customer-app .chat-sidebar {
                 width: 100%;
                 height: 100%;
@@ -775,6 +988,7 @@
                 top: 0;
                 left: 0;
                 z-index: 20;
+                background: white;
             }
 
             #customer-app.chat-active .chat-sidebar {
@@ -804,6 +1018,17 @@
                 cursor: pointer;
             }
 
+            .img-gen-layout {
+                flex-direction: column;
+            }
+
+            .img-sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
             .chat-messages {
                 padding: 15px 10px;
             }
@@ -830,7 +1055,7 @@
             <div class="role-card" onclick="enterAdmin()">
                 <i class="fa-solid fa-user-shield" style="font-size: 3rem; margin-bottom: 20px; color: #818cf8;"></i>
                 <h2>Quản Trị Viên</h2>
-                <p style="opacity: 0.7; margin-top: 10px;">Tạo Bot, Huấn luyện Tri thức & Xem dữ liệu</p>
+                <p style="opacity: 0.7; margin-top: 10px;">Quản lý Bot & Template Ảnh</p>
             </div>
             <div class="role-card" onclick="enterCustomer()">
                 <i class="fa-solid fa-comments" style="font-size: 3rem; margin-bottom: 20px; color: #2dd4bf;"></i>
@@ -840,118 +1065,167 @@
         </div>
     </div>
 
-    <!-- 1.5. MÀN HÌNH ĐĂNG NHẬP ADMIN (MỚI) -->
+    <!-- 2. LOGIN ADMIN -->
     <div id="admin-login-screen" class="dark-screen hidden">
         <div class="login-card">
             <div class="login-title"><i class="fa-solid fa-lock"></i> Đăng nhập Admin</div>
-
-            <div class="form-group">
-                <label class="form-label">Tài khoản</label>
-                <input type="text" id="login-user" class="form-input" placeholder="admin">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" id="login-pass" class="form-input" placeholder="••••••">
-            </div>
-
+            <div class="form-group"><label class="form-label">Tài khoản</label><input type="text" id="login-user"
+                    class="form-input" placeholder="admin"></div>
+            <div class="form-group"><label class="form-label">Mật khẩu</label><input type="password" id="login-pass"
+                    class="form-input" placeholder="••••••"></div>
             <button class="btn btn-primary w-full" onclick="submitLogin()">Đăng nhập</button>
             <button class="btn btn-ghost w-full" onclick="logout()" style="margin-top: 10px;">Quay lại</button>
         </div>
     </div>
 
-    <!-- 2. GIAO DIỆN ADMIN (DASHBOARD) -->
+    <!-- 3. ADMIN DASHBOARD -->
     <div id="admin-app" class="app-layout hidden">
         <div class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 30px;"><i class="fa-solid fa-cube"></i> Admin Panel</h2>
-            <button class="btn btn-primary" onclick="openCreateBotModal()"
-                style="width: 100%; justify-content: center;">
-                <i class="fa-solid fa-plus"></i> Tạo Bot Mới
-            </button>
+            <h2 style="color: var(--primary); margin-bottom: 20px;"><i class="fa-solid fa-cube"></i> Admin</h2>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" onclick="switchAdminTab('bot')" id="menu-bot"><i
+                        class="fa-solid fa-robot"></i> Chatbots</li>
+                <li class="menu-item" onclick="switchAdminTab('image')" id="menu-image"><i
+                        class="fa-solid fa-image"></i> Template Ảnh</li>
+            </ul>
             <div style="flex: 1;"></div>
-            <button class="btn btn-ghost" onclick="logout()"><i class="fa-solid fa-arrow-left"></i> Thoát</button>
+            <button class="btn btn-ghost" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                Thoát</button>
         </div>
+
         <div class="main-content">
-            <div class="top-bar">
-                <h3>Danh sách Bot hoạt động</h3>
-                <span id="admin-status" style="font-size: 0.9rem; color: var(--text-light);">Admin Logged In</span>
+            <!-- VIEW: BOT MANAGER -->
+            <div id="view-admin-bot" class="w-full h-full flex flex-col">
+                <div class="top-bar">
+                    <h3>Danh sách Chatbot</h3>
+                    <button class="btn btn-primary" onclick="openCreateBotModal()">+ Tạo Bot</button>
+                </div>
+                <div class="grid-container" id="bot-grid"></div>
             </div>
-            <div class="grid-container" id="bot-grid">
-                <!-- Bot cards inserted here -->
+
+            <!-- VIEW: IMAGE TEMPLATE MANAGER -->
+            <div id="view-admin-image" class="w-full h-full flex flex-col hidden">
+                <div class="top-bar">
+                    <h3>Template Ảnh AI</h3>
+                    <button class="btn btn-primary" onclick="openTemplateModal()">+ Tạo Template</button>
+                </div>
+                <div class="grid-container" id="template-grid"></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN KHÁCH HÀNG -->
+    <!-- 4. CUSTOMER APP -->
     <div id="customer-app" class="app-layout hidden">
-        <!-- Sidebar -->
-        <div class="chat-sidebar">
-            <div class="sidebar-header">
-                <div class="brand"><i class="fa-brands fa-rocketchat"></i> Chat Client</div>
-                <div class="id-input-group">
-                    <input type="text" id="cust-id" placeholder="ID của bạn...">
+        <div class="sidebar">
+            <h2 style="color: #0ea5e9; margin-bottom: 20px;">Client App</h2>
+            <div class="form-group">
+                <label class="form-label" style="font-size: 0.75rem;">USER ID</label>
+                <div class="flex gap-2">
+                    <input type="text" id="cust-id" class="form-input" style="padding: 6px;">
                     <button class="btn-icon" onclick="randomId()" title="Tạo ngẫu nhiên"><i
                             class="fa-solid fa-shuffle"></i></button>
                 </div>
             </div>
-
-            <div class="section-title">Chọn Bot để trò chuyện</div>
-            <div id="cust-bot-list">
-                <!-- Danh sách Bot sẽ được JS render vào đây -->
-            </div>
-
-            <button class="btn-back-sidebar" onclick="logout()">
-                <i class="fa-solid fa-arrow-left"></i> Thoát ra trang chủ
-            </button>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" onclick="switchCustTab('chat')" id="cmenu-chat"><i
+                        class="fa-regular fa-comments"></i> Chat AI</li>
+                <li class="menu-item" onclick="switchCustTab('image')" id="cmenu-image"><i
+                        class="fa-regular fa-image"></i> Tạo Ảnh</li>
+            </ul>
+            <div style="flex: 1;"></div>
+            <button class="btn btn-back-sidebar" onclick="logout()"><i class="fa-solid fa-arrow-left"></i>
+                Thoát</button>
         </div>
 
-        <!-- Chat Area -->
-        <div class="chat-area">
-            <!-- Top Bar -->
-            <div class="chat-top-bar">
-                <div style="display: flex; align-items: center;">
-                    <button class="mobile-back-btn" onclick="backToBotList()"><i
-                            class="fa-solid fa-chevron-left"></i></button>
-                    <div class="chat-header-info">
-                        <div class="bot-avatar-small" id="chat-avatar"
-                            style="background: var(--primary); color: white;">#</div>
-                        <div>
-                            <h4 id="chat-bot-name" style="margin: 0;">Chưa chọn Bot</h4>
-                            <span class="status-text" id="chat-bot-status"><span class="status-dot"></span>Online</span>
+        <div class="main-content">
+            <!-- VIEW: CHAT -->
+            <div id="view-cust-chat" class="w-full h-full flex">
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <div class="section-title">CHỌN BOT</div>
+                    </div>
+                    <div id="cust-bot-list"></div>
+                </div>
+                <div class="chat-area">
+                    <div class="chat-top-bar">
+                        <div style="display: flex; align-items: center;">
+                            <button class="mobile-back-btn" onclick="backToBotList()"><i
+                                    class="fa-solid fa-chevron-left"></i></button>
+                            <div class="chat-header-info">
+                                <div class="bot-avatar-small" id="chat-avatar"
+                                    style="background: var(--primary); color: white;">#</div>
+                                <div>
+                                    <h4 id="chat-header-name" style="margin: 0;">Chưa chọn Bot</h4>
+                                    <span class="status-text" id="chat-bot-status"><span
+                                            class="status-dot"></span>Online</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-icon" onclick="loadHistory()" title="Tải lại đoạn chat"><i
+                                class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="empty-chat">
+                            <i class="fa-regular fa-paper-plane"></i>
+                            <h3>Bắt đầu cuộc trò chuyện mới</h3>
+                            <p>Chọn một Bot từ danh sách và gửi lời chào.</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <div class="input-wrapper">
+                            <!-- UPDATED TO TEXTAREA -->
+                            <textarea id="chat-input" placeholder="Nhập tin nhắn... (Shift+Enter xuống dòng)" disabled
+                                onkeydown="handleEnter(event)"></textarea>
+                            <button id="send-btn" onclick="sendMessage()" disabled><i
+                                    class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 </div>
-                <button class="btn-icon" onclick="loadHistory()" title="Tải lại đoạn chat"><i
-                        class="fa-solid fa-rotate-right"></i></button>
             </div>
 
-            <!-- Messages -->
-            <div id="chat-container" class="chat-messages">
-                <div class="empty-chat">
-                    <i class="fa-regular fa-paper-plane"></i>
-                    <h3>Bắt đầu cuộc trò chuyện mới</h3>
-                    <p>Chọn một Bot từ danh sách và gửi lời chào.</p>
+            <!-- VIEW: IMAGE GEN -->
+            <div id="view-cust-image" class="w-full h-full hidden img-gen-layout">
+                <div class="img-sidebar">
+                    <div class="section-title">CHỌN TEMPLATE</div>
+                    <div id="cust-template-list" style="margin-top: 15px;"></div>
                 </div>
-            </div>
+                <div class="img-preview-area">
+                    <div id="img-form-area" class="w-full max-w-md hidden bg-white p-6 rounded-xl shadow-sm border"
+                        style="padding: 30px; border-radius: 16px; border: 1px solid var(--border);">
+                        <h3 id="form-template-name" class="mb-4">Nhập thông tin</h3>
+                        <div id="img-input-container"></div>
+                        <button class="btn btn-primary w-full mt-4" onclick="generateImage()">✨ Tạo Ảnh Ngay</button>
+                    </div>
 
-            <!-- Input -->
-            <div class="chat-input-container">
-                <div class="input-wrapper">
-                    <input type="text" id="chat-input" placeholder="Nhập tin nhắn của bạn..."
-                        onkeypress="handleEnter(event)" disabled>
-                    <button id="send-btn" onclick="sendMessage()" disabled><i
-                            class="fa-solid fa-paper-plane"></i></button>
+                    <div id="img-result-area" class="mt-4 w-full flex flex-col items-center hidden"
+                        style="margin-top: 30px;">
+                        <!-- UPDATED WITH SPINNER OVERLAY -->
+                        <div class="generated-image bg-gray-200 w-full h-64 flex items-center justify-center text-gray-500 relative overflow-hidden"
+                            id="img-preview-box"
+                            style="background: #e2e8f0; height: 300px; width: 100%; max-width: 500px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <div id="img-placeholder-text">(Giả lập) Ảnh sẽ hiện ở đây</div>
+                            <div id="img-loading-spinner" class="loading-spinner hidden absolute"></div>
+                        </div>
+                        <div class="prompt-box" id="final-prompt-display">Prompt AI...</div>
+                    </div>
+
+                    <div id="img-empty-state" class="text-center text-gray-400"
+                        style="text-align: center; color: var(--text-light);">
+                        <i class="fa-solid fa-wand-magic-sparkles"
+                            style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                        <p>Chọn template bên trái để bắt đầu</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 1: TẠO/SỬA BOT -->
+    <!-- MODAL 1: BOT (ADMIN) -->
     <div id="bot-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
                 <h3 id="bot-modal-title">Tạo Bot Mới</h3>
-                <button class="btn btn-ghost" onclick="closeModal('bot-modal')"><i
-                        class="fa-solid fa-xmark"></i></button>
+                <button class="btn-icon" onclick="closeModal('bot-modal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <div class="tabs" id="create-mode-tabs">
@@ -969,56 +1243,37 @@
                             placeholder="VD: Bot chuyên gia dinh dưỡng..."></textarea>
                     </div>
                     <div class="flex gap-4">
-                        <div class="form-group w-full">
-                            <label class="form-label">Tên Bot</label>
-                            <input type="text" id="auto-name" class="form-input">
-                        </div>
-                        <div class="form-group w-full">
-                            <label class="form-label">Mã Code</label>
-                            <input type="text" id="auto-code" class="form-input">
-                        </div>
+                        <div class="form-group w-full"><label class="form-label">Tên Bot</label><input type="text"
+                                id="auto-name" class="form-input"></div>
+                        <div class="form-group w-full"><label class="form-label">Mã Code</label><input type="text"
+                                id="auto-code" class="form-input"></div>
                     </div>
                 </div>
 
                 <!-- MANUAL -->
                 <div id="form-manual">
                     <div class="flex gap-4">
-                        <div class="form-group w-full">
-                            <label class="form-label">Tên Bot *</label>
-                            <input type="text" id="manual-name" class="form-input">
-                        </div>
-                        <div class="form-group w-full">
-                            <label class="form-label">Mã Code (Unique) *</label>
-                            <input type="text" id="manual-code" class="form-input">
-                        </div>
+                        <div class="form-group w-full"><label class="form-label">Tên Bot *</label><input type="text"
+                                id="manual-name" class="form-input"></div>
+                        <div class="form-group w-full"><label class="form-label">Mã Code (Unique) *</label><input
+                                type="text" id="manual-code" class="form-input"></div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">System Prompt (Cốt lõi) *</label>
-                        <textarea id="manual-prompt" class="form-input"
-                            placeholder="Bạn là ai? Nhiệm vụ của bạn là gì?"></textarea>
-                    </div>
+                    <div class="form-group"><label class="form-label">System Prompt (Cốt lõi) *</label><textarea
+                            id="manual-prompt" class="form-input"></textarea></div>
                     <div class="flex gap-4">
-                        <div class="form-group w-full">
-                            <label class="form-label">Giọng điệu</label>
-                            <input type="text" id="manual-tone" class="form-input">
-                        </div>
-                        <div class="form-group w-full">
-                            <label class="form-label">Thái độ</label>
-                            <input type="text" id="manual-attitude" class="form-input">
-                        </div>
+                        <div class="form-group w-full"><label class="form-label">Giọng điệu</label><input type="text"
+                                id="manual-tone" class="form-input"></div>
+                        <div class="form-group w-full"><label class="form-label">Thái độ</label><input type="text"
+                                id="manual-attitude" class="form-input"></div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Chủ đề cấm kỵ</label>
-                        <input type="text" id="manual-prohibited" class="form-input">
-                    </div>
-
-                    <!-- MEMORY CONFIG (MỚI THÊM) -->
+                    <div class="form-group"><label class="form-label">Chủ đề cấm kỵ</label><input type="text"
+                            id="manual-prohibited" class="form-input"></div>
                     <div class="form-group"
                         style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="form-label" style="margin:0">Cấu hình Trí nhớ (Memory Fields)</label>
+                            <label class="form-label" style="margin:0">Cấu hình Trí nhớ</label>
                             <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 8px;"
-                                onclick="addMemoryRow()">+ Thêm trường</button>
+                                onclick="addMemoryRow()">+ Thêm</button>
                         </div>
                         <div id="memory-container"></div>
                     </div>
@@ -1032,80 +1287,101 @@
         </div>
     </div>
 
-    <!-- MODAL 2: KNOWLEDGE (ĐÃ CẬP NHẬT TAB FILE UPLOAD) -->
+    <!-- MODAL 2: IMAGE TEMPLATE (ADMIN) -->
+    <div id="template-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Tạo Template Ảnh</h3>
+                <button class="btn-icon" onclick="closeModal('template-modal')"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab-item active" onclick="switchTemplateMode('manual')" id="tmode-manual">Thủ Công</div>
+                    <div class="tab-item" onclick="switchTemplateMode('auto')" id="tmode-auto">AI Auto-Gen</div>
+                </div>
+
+                <div id="tform-auto" class="hidden">
+                    <div class="form-group"><label class="form-label">Mô tả ý tưởng Template</label><textarea
+                            id="tauto-desc" class="form-input"></textarea></div>
+                    <div class="form-group"><label class="form-label">Mã Template</label><input type="text"
+                            id="tauto-code" class="form-input" placeholder="FOOD_MENU_01"></div>
+                </div>
+
+                <div id="tform-manual">
+                    <div class="flex gap-4">
+                        <div class="form-group w-full"><label class="form-label">Tên Template</label><input type="text"
+                                id="tman-name" class="form-input"></div>
+                        <div class="form-group w-full"><label class="form-label">Mã Code</label><input type="text"
+                                id="tman-code" class="form-input"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Base Prompt (Chứa {{VAR}})</label><textarea
+                            id="tman-prompt" class="form-input"
+                            placeholder="A photo of {{PRODUCT}} on {{BACKGROUND}}..."></textarea></div>
+                    <div class="form-group"><label class="form-label">Biến số (Cách nhau dấu phẩy)</label><input
+                            type="text" id="tman-vars" class="form-input" placeholder="PRODUCT, BACKGROUND"></div>
+                </div>
+
+                <div class="flex justify-end mt-4">
+                    <button class="btn btn-primary" onclick="submitTemplate()" id="btn-save-template">Lưu
+                        Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: KNOWLEDGE (ADMIN) -->
     <div id="knowledge-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
                 <h3>Tri Thức: <span id="k-bot-name" style="color: var(--primary);"></span></h3>
-                <button class="btn btn-ghost" onclick="closeModal('knowledge-modal')"><i
+                <button class="btn-icon" onclick="closeModal('knowledge-modal')"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Tabs Knowledge -->
                 <div class="tabs">
                     <div class="tab-item active" onclick="switchKnowledgeTab('manual')" id="ktab-manual">Nhập Thủ Công
                     </div>
-                    <div class="tab-item" onclick="switchKnowledgeTab('file')" id="ktab-file">Nhập Từ File (PDF/Word)
-                    </div>
+                    <div class="tab-item" onclick="switchKnowledgeTab('file')" id="ktab-file">Nhập Từ File</div>
                 </div>
-
-                <!-- TAB 1: MANUAL -->
                 <div id="k-form-manual">
                     <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                        <h4 style="margin-bottom: 10px;">Thêm Tri thức Mới</h4>
-                        <textarea id="k-new-content" class="form-input" placeholder="Nhập nội dung..."
+                        <textarea id="k-new-content" class="form-input" placeholder="Nội dung..."
                             style="min-height: 60px; margin-bottom: 8px;"></textarea>
                         <input type="text" id="k-new-keywords" class="form-input" placeholder="Từ khóa..."
                             style="margin-bottom: 8px;">
-                        <div style="text-align: right;"><button class="btn btn-primary" onclick="addKnowledge()">Thêm
-                                Mới</button></div>
+                        <div style="text-align: right;"><button class="btn btn-primary"
+                                onclick="addKnowledge()">Thêm</button></div>
                     </div>
                 </div>
-
-                <!-- TAB 2: FILE UPLOAD -->
                 <div id="k-form-file" class="hidden">
                     <div
                         style="background: #eff6ff; padding: 20px; border-radius: 8px; border: 1px dashed #6366f1; text-align: center; margin-bottom: 20px;">
-                        <i class="fa-solid fa-cloud-arrow-up"
-                            style="font-size: 2rem; color: #6366f1; margin-bottom: 10px;"></i>
-                        <p style="margin-bottom: 10px; font-size: 0.9rem;">Hỗ trợ: PDF, DOCX, TXT, Ảnh</p>
                         <input type="file" id="k-file-input" accept=".pdf,.docx,.txt,.jpg,.png" style="display: none;"
                             onchange="handleFileSelect()">
                         <button class="btn btn-secondary" onclick="document.getElementById('k-file-input').click()">Chọn
                             File</button>
-                        <div id="file-name-display"
-                            style="margin-top: 10px; font-weight: 600; color: var(--text-main);"></div>
+                        <div id="file-name-display" style="margin-top: 10px; font-weight: 600;"></div>
                         <button id="btn-process-file" class="btn btn-primary hidden" style="margin-top: 10px;"
-                            onclick="uploadAndProcessFile()">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Phân tích & Trích xuất
-                        </button>
+                            onclick="uploadAndProcessFile()">Phân tích</button>
                     </div>
-
-                    <!-- Preview Area -->
                     <div id="file-preview-area" class="hidden">
-                        <h4 style="margin-bottom: 10px; display: flex; justify-content: space-between;">
-                            <span>Kết quả trích xuất (<span id="preview-count">0</span>)</span>
-                            <button class="btn btn-primary" onclick="saveBulkKnowledge()">Lưu Tất Cả</button>
-                        </h4>
-                        <div id="preview-list"
-                            style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
-                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Kết quả:
+                                <span id="preview-count">0</span></span><button class="btn btn-primary"
+                                onclick="saveBulkKnowledge()">Lưu Tất Cả</button></div>
+                        <div id="preview-list" style="max-height: 300px; overflow-y: auto;"></div>
                     </div>
                 </div>
-
-                <!-- LIST -->
-                <h4 style="margin: 20px 0 10px;">Danh sách Tri thức hiện có</h4>
                 <div id="knowledge-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 3: CUSTOMER -->
+    <!-- MODAL 4: CUSTOMER (ADMIN) -->
     <div id="customer-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
-                <h3>Khách Hàng: <span id="c-bot-name" style="color: var(--primary);"></span></h3>
-                <button class="btn btn-ghost" onclick="closeModal('customer-modal')"><i
+                <h3>Khách Hàng</h3><button class="btn-icon" onclick="closeModal('customer-modal')"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
@@ -1127,420 +1403,181 @@
     <script>
         const API_URL = '/api';
 
-        // --- NAVIGATION & LOGIN ---
-        function enterAdmin() {
-            document.getElementById('role-screen').classList.add('hidden');
-            document.getElementById('admin-login-screen').classList.remove('hidden');
-        }
-
+        // --- AUTH ---
+        function enterAdmin() { document.getElementById('role-screen').classList.add('hidden'); document.getElementById('admin-login-screen').classList.remove('hidden'); }
         async function submitLogin() {
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
-
+            const u = document.getElementById('login-user').value, p = document.getElementById('login-pass').value;
             try {
-                const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass })
-                });
+                const res = await fetch(`${API_URL}/admin/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+                if (res.ok) { document.getElementById('admin-login-screen').classList.add('hidden'); document.getElementById('admin-app').classList.remove('hidden'); loadAdminBots(); }
+                else alert("Sai thông tin!");
+            } catch (e) { alert("Lỗi server"); }
+        }
+        function enterCustomer() { document.getElementById('role-screen').classList.add('hidden'); document.getElementById('customer-app').classList.remove('hidden'); randomId(); loadBotsCustomer(); loadCustTemplates(); }
+        function logout() { location.reload(); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-                if (res.ok) {
-                    document.getElementById('admin-login-screen').classList.add('hidden');
-                    document.getElementById('admin-app').classList.remove('hidden');
-                    loadBotsAdmin();
-                } else {
-                    alert("Sai tài khoản hoặc mật khẩu!");
-                }
-            } catch (err) {
-                alert("Lỗi kết nối server");
-            }
+        // --- ADMIN TABS ---
+        function switchAdminTab(tab) {
+            document.querySelectorAll('#admin-app .menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`menu-${tab}`).classList.add('active');
+            document.getElementById('view-admin-bot').classList.add('hidden');
+            document.getElementById('view-admin-image').classList.add('hidden');
+            document.getElementById(`view-admin-${tab}`).classList.remove('hidden');
+            if (tab === 'bot') loadAdminBots();
+            if (tab === 'image') loadAdminTemplates();
         }
 
-        function enterCustomer() {
-            document.getElementById('role-screen').classList.add('hidden');
-            document.getElementById('customer-app').classList.remove('hidden');
-            loadBotsCustomer();
-            randomId();
+        // --- ADMIN: BOT ---
+        async function loadAdminBots() {
+            const grid = document.getElementById('bot-grid'); grid.innerHTML = 'Loading...';
+            const res = await fetch(`${API_URL}/admin/bots`); const bots = await res.json();
+            grid.innerHTML = bots.map(b => `<div class="card"><div class="card-header"><span>${b.name}</span><span class="badge">${b.code}</span></div><div class="card-desc">${b.systemPrompt}</div><div class="card-actions"><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal(${JSON.stringify(b)})'>Data</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal(${JSON.stringify(b)})'>Users</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal(${JSON.stringify(b)})'>Edit</button></div></div>`).join('');
         }
 
-        function logout() {
-            // Ẩn tất cả các màn hình chính
-            document.getElementById('admin-app').classList.add('hidden');
-            document.getElementById('customer-app').classList.add('hidden');
-            document.getElementById('admin-login-screen').classList.add('hidden');
-            document.getElementById('role-screen').classList.remove('hidden');
-            document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // --- ADMIN FUNCTIONS ---
-        async function loadBotsAdmin() {
-            const grid = document.getElementById('bot-grid');
-            grid.innerHTML = 'Loading...';
-            try {
-                const res = await fetch(`${API_URL}/admin/bots`);
-                const bots = await res.json();
-                grid.innerHTML = bots.map(bot => `
-                    <div class="bot-card">
-                        <div class="bot-header"><strong>${bot.name}</strong><span class="bot-code-badge">${bot.code}</span></div>
-                        <div class="bot-desc">${bot.systemPrompt || ''}</div>
-                        <div class="bot-actions">
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal(${JSON.stringify(bot)})'><i class="fa-solid fa-book"></i> Data</button>
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal(${JSON.stringify(bot)})'><i class="fa-solid fa-users"></i> Users</button>
-                            <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal(${JSON.stringify(bot)})'><i class="fa-solid fa-pen"></i> Edit</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { grid.innerHTML = 'Error'; }
-        }
-
-        // CREATE / EDIT BOT
         let isEditMode = false;
-        function openCreateBotModal() {
-            isEditMode = false;
-            document.getElementById('bot-modal-title').innerText = "Tạo Bot Mới";
-            document.getElementById('create-mode-tabs').classList.remove('hidden');
-            switchCreateTab('manual');
-            clearBotForm();
-            document.getElementById('bot-modal').classList.remove('hidden');
-        }
-
-        function openEditBotModal(bot) {
-            isEditMode = true;
-            document.getElementById('bot-modal-title').innerText = "Sửa Bot";
-            document.getElementById('create-mode-tabs').classList.add('hidden');
-            switchCreateTab('manual');
-
-            document.getElementById('bot-id').value = bot._id;
-            document.getElementById('manual-name').value = bot.name;
-            document.getElementById('manual-code').value = bot.code;
-            document.getElementById('manual-prompt').value = bot.systemPrompt;
-            document.getElementById('manual-tone').value = bot.behaviorConfig?.tone || '';
-            document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || '';
-            document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || '';
-
-            const memContainer = document.getElementById('memory-container');
-            memContainer.innerHTML = '';
-            if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type));
-
-            document.getElementById('bot-modal').classList.remove('hidden');
-        }
-
-        function switchCreateTab(mode) {
-            document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${mode}`).classList.add('active');
-            if (mode === 'manual') {
-                document.getElementById('form-manual').classList.remove('hidden');
-                document.getElementById('form-auto').classList.add('hidden');
-            } else {
-                document.getElementById('form-manual').classList.add('hidden');
-                document.getElementById('form-auto').classList.remove('hidden');
-            }
-        }
-
-        function addMemoryRow(key = '', desc = '', type = 'string') {
-            const container = document.getElementById('memory-container');
-            const id = 'mem-' + Date.now() + Math.random();
-            container.insertAdjacentHTML('beforeend', `
-                <div class="memory-row" id="${id}">
-                    <input type="text" class="form-input mem-key" placeholder="Key (vd: ten)" value="${key}">
-                    <input type="text" class="form-input mem-desc" placeholder="Mô tả" value="${desc}">
-                    <select class="form-input mem-type" style="width:100px; flex:none;">
-                        <option value="string" ${type === 'string' ? 'selected' : ''}>Text</option>
-                        <option value="number" ${type === 'number' ? 'selected' : ''}>Number</option>
-                        <option value="date" ${type === 'date' ? 'selected' : ''}>Date</option>
-                    </select>
-                    <button class="btn btn-ghost" onclick="document.getElementById('${id}').remove()" style="color:red;width:30px;padding:0;flex:none;"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `);
-        }
-
-        function clearBotForm() {
-            document.getElementById('bot-id').value = '';
-            document.querySelectorAll('#bot-modal input, #bot-modal textarea').forEach(el => el.value = '');
-            document.getElementById('memory-container').innerHTML = '';
-        }
-
+        function openCreateBotModal() { isEditMode = false; document.getElementById('bot-modal-title').innerText = "Tạo Bot"; document.getElementById('create-mode-tabs').classList.remove('hidden'); switchCreateTab('manual'); clearBotForm(); document.getElementById('bot-modal').classList.remove('hidden'); }
+        function openEditBotModal(bot) { isEditMode = true; document.getElementById('bot-modal-title').innerText = "Sửa Bot"; document.getElementById('create-mode-tabs').classList.add('hidden'); switchCreateTab('manual'); document.getElementById('bot-id').value = bot._id; document.getElementById('manual-name').value = bot.name; document.getElementById('manual-code').value = bot.code; document.getElementById('manual-prompt').value = bot.systemPrompt; document.getElementById('manual-tone').value = bot.behaviorConfig?.tone || ''; document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || ''; document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || ''; document.getElementById('memory-container').innerHTML = ''; if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type)); document.getElementById('bot-modal').classList.remove('hidden'); }
+        function switchCreateTab(mode) { document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${mode}`).classList.add('active'); document.getElementById('form-manual').classList.toggle('hidden', mode === 'auto'); document.getElementById('form-auto').classList.toggle('hidden', mode === 'manual'); }
+        function addMemoryRow(k = '', d = '', t = 'string') { document.getElementById('memory-container').insertAdjacentHTML('beforeend', `<div class="memory-row"><input class="form-input mem-key" placeholder="Key" value="${k}"><input class="form-input mem-desc" placeholder="Mô tả" value="${d}"><select class="form-input mem-type" style="width:100px;flex:none;"><option value="string" ${t === 'string' ? 'selected' : ''}>Text</option></select><button class="btn-icon" onclick="this.parentElement.remove()" style="color:red"><i class="fa-solid fa-trash"></i></button></div>`); }
+        function clearBotForm() { document.getElementById('bot-id').value = ''; document.querySelectorAll('#bot-modal input, #bot-modal textarea').forEach(el => el.value = ''); document.getElementById('memory-container').innerHTML = ''; }
         async function submitBotForm() {
-            const btn = document.getElementById('btn-save-bot');
-            btn.innerText = "..."; btn.disabled = true;
-
-            try {
-                if (!isEditMode && !document.getElementById('form-auto').classList.contains('hidden')) {
-                    // Auto
-                    await fetch(`${API_URL}/admin/bots/auto-generate`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            description: document.getElementById('auto-desc').value,
-                            name: document.getElementById('auto-name').value,
-                            code: document.getElementById('auto-code').value
-                        })
-                    });
-                } else {
-                    // Manual
-                    const memRows = document.querySelectorAll('.memory-row');
-                    const memoryConfig = [];
-                    memRows.forEach(row => {
-                        const key = row.querySelector('.mem-key').value.trim();
-                        if (key) memoryConfig.push({
-                            key, description: row.querySelector('.mem-desc').value, type: row.querySelector('.mem-type').value
-                        });
-                    });
-
-                    const payload = {
-                        name: document.getElementById('manual-name').value,
-                        code: document.getElementById('manual-code').value,
-                        systemPrompt: document.getElementById('manual-prompt').value,
-                        behaviorConfig: {
-                            tone: document.getElementById('manual-tone').value,
-                            attitude: document.getElementById('manual-attitude').value,
-                            prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').filter(s => s)
-                        },
-                        memoryConfig
-                    };
-                    const id = document.getElementById('bot-id').value;
-                    await fetch(`${API_URL}/admin/bots${isEditMode ? '/' + id : ''}`, {
-                        method: isEditMode ? 'PUT' : 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                }
-                closeModal('bot-modal');
-                loadBotsAdmin();
-            } catch (e) { alert("Error"); }
-            btn.innerText = "Lưu Bot"; btn.disabled = false;
-        }
-
-        // KNOWLEDGE & CUSTOMER & FILE UPLOAD
-        let currentKBot = null;
-        let previewData = [];
-
-        function switchKnowledgeTab(mode) {
-            document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`ktab-${mode}`).classList.add('active');
-            if (mode === 'manual') {
-                document.getElementById('k-form-manual').classList.remove('hidden');
-                document.getElementById('k-form-file').classList.add('hidden');
-            } else {
-                document.getElementById('k-form-manual').classList.add('hidden');
-                document.getElementById('k-form-file').classList.remove('hidden');
+            const isAuto = !document.getElementById('form-auto').classList.contains('hidden');
+            const url = isAuto ? `${API_URL}/admin/bots/auto-generate` : `${API_URL}/admin/bots${isEditMode ? '/' + document.getElementById('bot-id').value : ''}`;
+            const method = isAuto || !isEditMode ? 'POST' : 'PUT';
+            let payload = {};
+            if (isAuto) payload = { description: document.getElementById('auto-desc').value, name: document.getElementById('auto-name').value, code: document.getElementById('auto-code').value };
+            else {
+                const mems = []; document.querySelectorAll('.memory-row').forEach(r => { const k = r.querySelector('.mem-key').value; if (k) mems.push({ key: k, description: r.querySelector('.mem-desc').value, type: r.querySelector('.mem-type').value }); });
+                payload = { name: document.getElementById('manual-name').value, code: document.getElementById('manual-code').value, systemPrompt: document.getElementById('manual-prompt').value, behaviorConfig: { tone: document.getElementById('manual-tone').value, attitude: document.getElementById('manual-attitude').value, prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').filter(s => s) }, memoryConfig: mems };
             }
+            await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            closeModal('bot-modal'); loadAdminBots();
         }
 
-        async function openKnowledgeModal(bot) {
-            currentKBot = bot.code;
-            document.getElementById('k-bot-name').innerText = bot.name;
-            switchKnowledgeTab('manual'); // Reset tab
-            loadKList();
-            document.getElementById('knowledge-modal').classList.remove('hidden');
+        // --- ADMIN: IMAGE TEMPLATE ---
+        async function loadAdminTemplates() {
+            const grid = document.getElementById('template-grid'); grid.innerHTML = 'Loading...';
+            const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json();
+            grid.innerHTML = temps.map(t => `<div class="card"><div class="card-header"><span>${t.templateName}</span><span class="badge">${t.templateCode}</span></div><div class="card-desc">${t.basePrompt}</div><div style="font-size:0.8rem;color:var(--primary);margin-top:5px;">Vars: ${t.variables.join(', ')}</div></div>`).join('');
+        }
+        function openTemplateModal() { document.getElementById('template-modal').classList.remove('hidden'); }
+        function switchTemplateMode(mode) {
+            document.querySelectorAll('#template-modal .tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tmode-${mode}`).classList.add('active');
+            document.getElementById('tform-manual').classList.toggle('hidden', mode === 'auto');
+            document.getElementById('tform-auto').classList.toggle('hidden', mode === 'manual');
+        }
+        async function submitTemplate() {
+            const isAuto = !document.getElementById('tform-auto').classList.contains('hidden');
+            const payload = {
+                type: isAuto ? 'AUTO' : 'MANUAL',
+                templateCode: isAuto ? document.getElementById('tauto-code').value : document.getElementById('tman-code').value,
+                description: isAuto ? document.getElementById('tauto-desc').value : null,
+                manualData: isAuto ? null : { templateName: document.getElementById('tman-name').value, basePrompt: document.getElementById('tman-prompt').value, variables: document.getElementById('tman-vars').value.split(',').map(s => s.trim()) }
+            };
+            await fetch(`${API_URL}/admin/image-template`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            closeModal('template-modal'); loadAdminTemplates();
         }
 
-        async function loadKList() {
-            const list = document.getElementById('knowledge-list');
-            const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`);
-            const data = await res.json();
-            list.innerHTML = data.map(k => `
-                <div class="knowledge-item">
-                    <div class="k-content">${k.content}</div>
-                    <div class="k-keywords">${k.keywords?.join(', ')}</div>
-                    <div class="k-actions"><button class="btn btn-ghost" style="color:red;font-size:0.75rem" onclick="delK('${k._id}')">Xóa</button></div>
-                </div>
-            `).join('');
-        }
-
-        async function addKnowledge() {
-            await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: document.getElementById('k-new-content').value,
-                    keywords: document.getElementById('k-new-keywords').value.split(',')
-                })
-            });
-            document.getElementById('k-new-content').value = '';
-            loadKList();
-        }
-
-        async function delK(id) {
-            if (confirm("Xóa?")) {
-                await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' });
-                loadKList();
-            }
-        }
-
-        function handleFileSelect() {
-            const file = document.getElementById('k-file-input').files[0];
-            if (file) {
-                document.getElementById('file-name-display').innerText = file.name;
-                document.getElementById('btn-process-file').classList.remove('hidden');
-            }
-        }
-
+        // --- ADMIN: KNOWLEDGE & CUSTOMER ---
+        let currentKBot = null; let previewData = [];
+        function switchKnowledgeTab(mode) { document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`ktab-${mode}`).classList.add('active'); document.getElementById('k-form-manual').classList.toggle('hidden', mode !== 'manual'); document.getElementById('k-form-file').classList.toggle('hidden', mode !== 'file'); }
+        async function openKnowledgeModal(bot) { currentKBot = bot.code; document.getElementById('k-bot-name').innerText = bot.name; switchKnowledgeTab('manual'); loadKList(); document.getElementById('knowledge-modal').classList.remove('hidden'); }
+        async function loadKList() { const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`); const data = await res.json(); document.getElementById('knowledge-list').innerHTML = data.map(k => `<div class="knowledge-item"><div class="k-content">${k.content}</div><div class="k-keywords">${k.keywords?.join(', ')}</div><div class="k-actions"><button class="btn-icon" onclick="delK('${k._id}')" style="color:red;width:24px;height:24px;"><i class="fa-solid fa-trash"></i></button></div></div>`).join(''); }
+        async function addKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: document.getElementById('k-new-content').value, keywords: document.getElementById('k-new-keywords').value.split(',') }) }); document.getElementById('k-new-content').value = ''; loadKList(); }
+        async function delK(id) { if (confirm("Xóa?")) { await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' }); loadKList(); } }
+        function handleFileSelect() { const f = document.getElementById('k-file-input').files[0]; if (f) { document.getElementById('file-name-display').innerText = f.name; document.getElementById('btn-process-file').classList.remove('hidden'); } }
         async function uploadAndProcessFile() {
-            const file = document.getElementById('k-file-input').files[0];
-            if (!file) return;
-
-            const btn = document.getElementById('btn-process-file');
-            btn.innerText = "Processing..."; btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
+            const f = document.getElementById('k-file-input').files[0]; if (!f) return;
+            const btn = document.getElementById('btn-process-file'); btn.innerText = "Running..."; btn.disabled = true;
+            const fd = new FormData(); fd.append('file', f);
             try {
-                const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, {
-                    method: 'POST', body: formData
-                });
-                const data = await res.json();
-                if (data.success) {
-                    previewData = data.previewChunks;
-                    renderPreview();
-                    document.getElementById('file-preview-area').classList.remove('hidden');
-                } else alert(data.error);
-            } catch (e) { alert("Upload error"); }
-            btn.innerText = "Phân tích & Trích xuất"; btn.disabled = false;
+                const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, { method: 'POST', body: fd }); const data = await res.json();
+                if (data.success) { previewData = data.previewChunks; document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join(''); document.getElementById('file-preview-area').classList.remove('hidden'); }
+            } catch (e) { alert("Err"); } btn.innerText = "Phân tích"; btn.disabled = false;
+        }
+        async function saveBulkKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chunks: previewData }) }); alert("Saved!"); document.getElementById('file-preview-area').classList.add('hidden'); loadKList(); }
+        async function openCustomerModal(bot) { document.getElementById('c-bot-name').innerText = bot.name; const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`); const data = await res.json(); document.getElementById('customer-list-body').innerHTML = data.map(c => `<tr><td>${c.id}</td><td>${new Date(c.lastActive).toLocaleDateString()}</td><td>${JSON.stringify(c.attributes)}</td></tr>`).join(''); document.getElementById('customer-modal').classList.remove('hidden'); }
+
+        // --- CUSTOMER LOGIC ---
+        let currentUserId = null;
+        function randomId() { document.getElementById('cust-id').value = 'USER_' + Math.floor(Math.random() * 9999); }
+        function switchCustTab(tab) {
+            document.querySelectorAll('#customer-app .menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`cmenu-${tab}`).classList.add('active');
+            document.getElementById('view-cust-chat').classList.add('hidden');
+            document.getElementById('view-cust-image').classList.add('hidden');
+            document.getElementById(`view-cust-${tab}`).classList.remove('hidden');
         }
 
-        function renderPreview() {
-            const container = document.getElementById('preview-list');
-            document.getElementById('preview-count').innerText = previewData.length;
-            container.innerHTML = previewData.map((item, index) => `
-                <div class="knowledge-item" style="border-left: 3px solid #6366f1;">
-                    <textarea class="form-input" style="font-size:0.85rem; margin-bottom:5px;" onchange="updatePreview(${index}, 'content', this.value)">${item.content}</textarea>
-                    <input type="text" class="form-input" style="font-size:0.8rem;" value="${item.keywords.join(', ')}" onchange="updatePreview(${index}, 'keywords', this.value)">
-                    <div style="text-align:right; margin-top:5px;"><button class="btn btn-ghost" style="color:red; font-size:0.7rem;" onclick="removePreviewItem(${index})">Xóa dòng này</button></div>
-                </div>
-            `).join('');
-        }
-
-        function updatePreview(index, field, value) {
-            if (field === 'keywords') previewData[index].keywords = value.split(',').map(s => s.trim());
-            else previewData[index].content = value;
-        }
-
-        function removePreviewItem(index) {
-            previewData.splice(index, 1);
-            renderPreview();
-        }
-
-        async function saveBulkKnowledge() {
-            if (previewData.length === 0) return alert("Empty");
-            try {
-                await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chunks: previewData })
-                });
-                alert("Saved!");
-                document.getElementById('file-preview-area').classList.add('hidden');
-                previewData = [];
-                loadKList();
-            } catch (e) { alert("Error"); }
-        }
-
-        async function openCustomerModal(bot) {
-            document.getElementById('c-bot-name').innerText = bot.name;
-            const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`);
-            const data = await res.json();
-            document.getElementById('customer-list-body').innerHTML = data.map(c => {
-                let attr = '';
-                if (c.attributes) Object.entries(c.attributes).forEach(([k, v]) => attr += `<span class="attr-tag">${k}: ${v}</span>`);
-                return `<tr><td>${c.id}</td><td>${new Date(c.lastActive).toLocaleString()}</td><td>${attr}</td></tr>`;
-            }).join('');
-            document.getElementById('customer-modal').classList.remove('hidden');
-        }
-
-        // --- CHAT CLIENT ---
-        let currentBot = null, currentUserId = null, firstMsgId = null;
-
-        function randomId() { document.getElementById('cust-id').value = 'USER_' + Math.floor(Math.random() * 10000); }
-
-        async function loadBotsCustomer() {
-            const res = await fetch(`${API_URL}/admin/bots`);
-            const bots = await res.json();
-            document.getElementById('cust-bot-list').innerHTML = bots.map(bot => `
-                <div class="bot-list-item" onclick="selectBot('${bot.code}', '${bot.name}')" id="bot-item-${bot.code}">
-                    <div class="bot-avatar-small">${bot.name[0]}</div>
-                    <div><div style="font-weight:600;font-size:0.9rem;">${bot.name}</div><div style="font-size:0.75rem;color:gray;">${bot.behaviorConfig?.tone || ''}</div></div>
-                </div>
-            `).join('');
-        }
-
+        // CUSTOMER CHAT
+        let currentChatBot = null; let firstMsgId = null;
+        async function loadBotsCustomer() { const res = await fetch(`${API_URL}/admin/bots`); const bots = await res.json(); document.getElementById('cust-bot-list').innerHTML = bots.map(b => `<div class="bot-list-item" onclick="selectBot('${b.code}', '${b.name}')" id="bot-item-${b.code}"><div class="bot-avatar-small">${b.name[0]}</div><div><div style="font-weight:600;font-size:0.9rem;">${b.name}</div><div style="font-size:0.75rem;color:gray;">${b.behaviorConfig?.tone || ''}</div></div></div>`).join(''); }
         function selectBot(code, name) {
-            currentUserId = document.getElementById('cust-id').value;
-            if (!currentUserId) return alert("Nhập ID trước!");
-
-            currentBot = code;
-            document.querySelectorAll('.bot-list-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`bot-item-${code}`).classList.add('active');
-            document.getElementById('chat-bot-name').innerText = name;
-            document.getElementById('chat-avatar').innerText = name[0];
-
-            document.getElementById('chat-input').disabled = false;
-            document.getElementById('send-btn').disabled = false;
-
+            currentUserId = document.getElementById('cust-id').value; if (!currentUserId) return alert("Nhập ID!");
+            currentChatBot = code; document.querySelectorAll('.bot-list-item').forEach(el => el.classList.remove('active')); document.getElementById(`bot-item-${code}`).classList.add('active');
+            document.getElementById('chat-header-name').innerText = name; document.getElementById('chat-avatar').innerText = name[0];
+            document.getElementById('chat-input').disabled = false; document.getElementById('send-btn').disabled = false;
             loadHistory(true);
-            document.getElementById('customer-app').classList.add('chat-active');
+            // Mobile toggle
+            if (window.innerWidth <= 768) document.getElementById('customer-app').classList.add('chat-active');
         }
-
-        function backToBotList() {
-            document.getElementById('customer-app').classList.remove('chat-active');
-        }
-
+        function backToBotList() { document.getElementById('customer-app').classList.remove('chat-active'); }
         async function loadHistory(reset = false) {
-            const container = document.getElementById('chat-container');
-            let url = `${API_URL}/chat/${currentBot}/history?userIdentifier=${currentUserId}&limit=10`;
+            const container = document.getElementById('chat-messages');
+            let url = `${API_URL}/chat/${currentChatBot}/history?userIdentifier=${currentUserId}&limit=10`;
             if (!reset && firstMsgId) url += `&beforeId=${firstMsgId}`;
-
-            const res = await fetch(url);
-            const data = await res.json();
-            const msgs = data.data;
-
-            if (reset) {
-                container.innerHTML = '';
-                if (msgs.length === 0) container.innerHTML = '<div class="empty-chat"><i class="fa-regular fa-paper-plane"></i><h3>Bắt đầu chat</h3></div>';
-            }
-            if (msgs.length > 0) {
-                firstMsgId = msgs[0]._id;
-                const html = msgs.map(renderMsg).join('');
-                if (reset) { container.innerHTML = html; scrollToBottom(); }
-                else {
-                    const h = container.scrollHeight;
-                    container.insertAdjacentHTML('afterbegin', html);
-                    container.scrollTop = container.scrollHeight - h;
-                }
-            }
+            const res = await fetch(url); const data = await res.json();
+            const html = data.data.map(m => `<div class="message-row ${m.role === 'user' ? 'user' : 'bot'}"><div class="msg-bubble">${m.content}</div></div>`).join('');
+            if (reset) { container.innerHTML = html; container.scrollTop = container.scrollHeight; if (data.data.length) firstMsgId = data.data[0]._id; }
+            else if (data.data.length) { const h = container.scrollHeight; container.insertAdjacentHTML('afterbegin', html); container.scrollTop = container.scrollHeight - h; firstMsgId = data.data[0]._id; }
         }
 
-        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { // ENTER ONLY
+                e.preventDefault();
+                sendMessage();
+            }
+            // SHIFT + ENTER will default to new line
+        }
 
         async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const txt = input.value.trim();
-            if (!txt) return;
+            const txt = document.getElementById('chat-input').value.trim(); if (!txt) return;
+            const container = document.getElementById('chat-messages');
 
-            const container = document.getElementById('chat-container');
-            if (container.querySelector('.empty-chat')) container.innerHTML = '';
+            // Render User
+            container.insertAdjacentHTML('beforeend', `<div class="message-row user"><div class="msg-bubble">${txt.replace(/\n/g, '<br>')}</div></div>`);
+            document.getElementById('chat-input').value = '';
+            container.scrollTop = container.scrollHeight;
 
-            container.insertAdjacentHTML('beforeend', renderMsg({ role: 'user', content: txt }));
-            scrollToBottom();
-            input.value = '';
+            // TYPING INDICATOR
+            const loadingId = 'typing-' + Date.now();
+            container.insertAdjacentHTML('beforeend', `
+                <div id="${loadingId}" class="message-row bot">
+                    <div class="msg-bubble">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            container.scrollTop = container.scrollHeight;
 
             try {
-                const loadId = 'loading-' + Date.now();
-                container.insertAdjacentHTML('beforeend', `<div id="${loadId}" class="message-row bot"><div class="msg-bubble">...</div></div>`);
-                scrollToBottom();
-
-                const res = await fetch(`${API_URL}/chat/${currentBot}/message`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userIdentifier: currentUserId, message: txt })
-                });
+                const res = await fetch(`${API_URL}/chat/${currentChatBot}/message`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userIdentifier: currentUserId, message: txt }) });
                 const data = await res.json();
-                document.getElementById(loadId).remove();
+
+                // REMOVE TYPING & ADD REPLY
+                document.getElementById(loadingId).remove();
                 container.insertAdjacentHTML('beforeend', renderMsg({ role: 'assistant', content: data.reply, metadata: data.captured_data }));
-                scrollToBottom();
-            } catch (e) { alert("Error"); }
+                container.scrollTop = container.scrollHeight;
+            } catch (e) {
+                document.getElementById(loadingId).remove();
+                alert("Lỗi mạng");
+            }
         }
 
         function renderMsg(msg) {
@@ -1553,11 +1590,41 @@
             return `<div class="message-row ${isUser ? 'user' : 'bot'}"><div class="msg-bubble">${msg.content.replace(/\n/g, '<br>')}${meta}</div></div>`;
         }
 
-        function scrollToBottom() {
-            const c = document.getElementById('chat-container');
-            c.scrollTop = c.scrollHeight;
+        // CUSTOMER IMAGE
+        let currentTemplate = null;
+        async function loadCustTemplates() { const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json(); document.getElementById('cust-template-list').innerHTML = temps.map(t => `<div class="template-item" onclick='selectTemplate(${JSON.stringify(t)})'><strong>${t.templateName}</strong></div>`).join(''); }
+        function selectTemplate(t) {
+            currentTemplate = t;
+            document.getElementById('img-empty-state').classList.add('hidden'); document.getElementById('img-form-area').classList.remove('hidden');
+            document.getElementById('form-template-name').innerText = t.templateName;
+            document.getElementById('img-input-container').innerHTML = t.variables.map(v => `<div class="form-group"><label class="form-label">${v}</label><input type="text" class="form-input img-var-input" data-var="${v}"></div>`).join('');
         }
+        async function generateImage() {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Đang tạo..."; btn.disabled = true;
 
+            // SHOW LOADING UI
+            document.getElementById('img-result-area').classList.remove('hidden');
+            document.getElementById('img-preview-box').style.opacity = '0.5';
+            document.getElementById('img-loading-spinner').classList.remove('hidden');
+            document.getElementById('img-placeholder-text').innerText = "Đang vẽ...";
+
+            const inputs = document.querySelectorAll('.img-var-input'); const vars = {}; inputs.forEach(i => vars[i.dataset.var] = i.value);
+            try {
+                const res = await fetch(`${API_URL}/image/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templateCode: currentTemplate.templateCode, variables: vars }) });
+                const data = await res.json();
+
+                document.getElementById('final-prompt-display').innerText = data.finalOptimizedPrompt;
+                // Nếu có ảnh thật: <img src="${data.url}" onload="hideSpinner()">
+                document.getElementById('img-placeholder-text').innerText = "(Giả lập) Ảnh đã tạo xong";
+            } catch (e) { alert("Lỗi"); }
+
+            // HIDE LOADING UI
+            document.getElementById('img-preview-box').style.opacity = '1';
+            document.getElementById('img-loading-spinner').classList.add('hidden');
+            btn.innerText = originalText; btn.disabled = false;
+        }
     </script>
 </body>
 
