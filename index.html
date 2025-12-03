@@ -38,7 +38,7 @@
             overflow: hidden;
         }
 
-        /* UTILS */
+        /* === UTILS === */
         .hidden {
             display: none !important;
         }
@@ -75,9 +75,13 @@
             gap: 1rem;
         }
 
-        /* BUTTONS */
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* === BUTTONS === */
         .btn {
-            padding: 10px 16px;
+            padding: 8px 16px;
             border-radius: 8px;
             border: none;
             font-weight: 600;
@@ -104,6 +108,11 @@
             background: white;
             border: 1px solid var(--border);
             color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #ef4444;
         }
 
         .btn-ghost {
@@ -135,7 +144,7 @@
             transform: translateY(-1px);
         }
 
-        /* SCREENS BACKGROUND */
+        /* === SCREENS BACKGROUND === */
         .dark-screen {
             height: 100vh;
             background: radial-gradient(circle at center, #1e1b4b, #0f172a);
@@ -146,7 +155,7 @@
             color: white;
         }
 
-        /* ROLE CARD */
+        /* === ROLE CARD === */
         .role-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -165,7 +174,7 @@
             border-color: var(--primary);
         }
 
-        /* LOGIN BOX */
+        /* === LOGIN BOX === */
         .login-card {
             background: white;
             padding: 40px;
@@ -183,7 +192,7 @@
             color: var(--primary);
         }
 
-        /* LAYOUTS */
+        /* === ADMIN LAYOUT === */
         .app-layout {
             display: flex;
             height: 100vh;
@@ -215,6 +224,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .grid-container {
@@ -275,7 +285,7 @@
             justify-content: flex-end;
         }
 
-        /* MODALS */
+        /* === MODALS === */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -323,7 +333,7 @@
             }
         }
 
-        /* TABS & FORMS */
+        /* === TABS & FORMS === */
         .tabs {
             display: flex;
             gap: 16px;
@@ -383,7 +393,18 @@
             align-items: center;
         }
 
-        /* TABLES */
+        .memory-row input {
+            flex: 1;
+        }
+
+        .memory-row select {
+            width: 100px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        /* === KNOWLEDGE & CUSTOMER TABLES === */
         .knowledge-item {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -439,7 +460,11 @@
             margin: 2px;
         }
 
-        /* CHAT UI */
+        /* ========================================= */
+        /* === CHAT UI (FIXED LAYOUT)            === */
+        /* ========================================= */
+
+        /* Sidebar Chat */
         .chat-sidebar {
             width: 320px;
             background: var(--surface);
@@ -450,6 +475,7 @@
             z-index: 10;
             transition: transform 0.3s ease;
             position: relative;
+            /* Fix z-index stacking */
         }
 
         .sidebar-header {
@@ -497,6 +523,7 @@
             flex-shrink: 0;
         }
 
+        /* FIX: List area scrollable correctly */
         #cust-bot-list {
             flex: 1;
             overflow-y: auto;
@@ -563,6 +590,7 @@
             color: var(--text-main);
         }
 
+        /* Chat Area */
         .chat-area {
             flex: 1;
             display: flex;
@@ -597,6 +625,11 @@
             border-radius: 50%;
             display: inline-block;
             margin-right: 4px;
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-light);
         }
 
         .chat-messages {
@@ -728,11 +761,12 @@
             color: var(--border);
         }
 
+        /* Mobile Back Button */
         .mobile-back-btn {
             display: none;
         }
 
-        /* RESPONSIVE */
+        /* === RESPONSIVE MOBILE === */
         @media (max-width: 768px) {
             #customer-app .chat-sidebar {
                 width: 100%;
@@ -852,9 +886,7 @@
         <!-- Sidebar -->
         <div class="chat-sidebar">
             <div class="sidebar-header">
-                <div class="brand">
-                    <i class="fa-brands fa-rocketchat"></i> Chat Client
-                </div>
+                <div class="brand"><i class="fa-brands fa-rocketchat"></i> Chat Client</div>
                 <div class="id-input-group">
                     <input type="text" id="cust-id" placeholder="ID của bạn...">
                     <button class="btn-icon" onclick="randomId()" title="Tạo ngẫu nhiên"><i
@@ -877,23 +909,19 @@
             <!-- Top Bar -->
             <div class="chat-top-bar">
                 <div style="display: flex; align-items: center;">
-                    <button class="mobile-back-btn" onclick="backToBotList()">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
+                    <button class="mobile-back-btn" onclick="backToBotList()"><i
+                            class="fa-solid fa-chevron-left"></i></button>
                     <div class="chat-header-info">
                         <div class="bot-avatar-small" id="chat-avatar"
                             style="background: var(--primary); color: white;">#</div>
                         <div>
                             <h4 id="chat-bot-name" style="margin: 0;">Chưa chọn Bot</h4>
-                            <span class="status-text" id="chat-bot-status">
-                                <span class="status-dot"></span>Online
-                            </span>
+                            <span class="status-text" id="chat-bot-status"><span class="status-dot"></span>Online</span>
                         </div>
                     </div>
                 </div>
-                <button class="btn-icon" onclick="loadHistory()" title="Tải lại đoạn chat">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
+                <button class="btn-icon" onclick="loadHistory()" title="Tải lại đoạn chat"><i
+                        class="fa-solid fa-rotate-right"></i></button>
             </div>
 
             <!-- Messages -->
@@ -910,9 +938,8 @@
                 <div class="input-wrapper">
                     <input type="text" id="chat-input" placeholder="Nhập tin nhắn của bạn..."
                         onkeypress="handleEnter(event)" disabled>
-                    <button id="send-btn" onclick="sendMessage()" disabled>
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
+                    <button id="send-btn" onclick="sendMessage()" disabled><i
+                            class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -985,7 +1012,7 @@
                         <input type="text" id="manual-prohibited" class="form-input">
                     </div>
 
-                    <!-- MEMORY CONFIG -->
+                    <!-- MEMORY CONFIG (MỚI THÊM) -->
                     <div class="form-group"
                         style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
                         <div class="flex justify-between items-center mb-2">
@@ -1005,7 +1032,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: KNOWLEDGE -->
+    <!-- MODAL 2: KNOWLEDGE (ĐÃ CẬP NHẬT TAB FILE UPLOAD) -->
     <div id="knowledge-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
@@ -1014,15 +1041,60 @@
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 10px;">Thêm Mới</h4>
-                    <textarea id="k-new-content" class="form-input" placeholder="Nội dung..."
-                        style="min-height: 60px; margin-bottom: 8px;"></textarea>
-                    <input type="text" id="k-new-keywords" class="form-input" placeholder="Từ khóa..."
-                        style="margin-bottom: 8px;">
-                    <div style="text-align: right;"><button class="btn btn-primary"
-                            onclick="addKnowledge()">Thêm</button></div>
+                <!-- Tabs Knowledge -->
+                <div class="tabs">
+                    <div class="tab-item active" onclick="switchKnowledgeTab('manual')" id="ktab-manual">Nhập Thủ Công
+                    </div>
+                    <div class="tab-item" onclick="switchKnowledgeTab('file')" id="ktab-file">Nhập Từ File (PDF/Word)
+                    </div>
                 </div>
+
+                <!-- TAB 1: MANUAL -->
+                <div id="k-form-manual">
+                    <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">Thêm Tri thức Mới</h4>
+                        <textarea id="k-new-content" class="form-input" placeholder="Nhập nội dung..."
+                            style="min-height: 60px; margin-bottom: 8px;"></textarea>
+                        <input type="text" id="k-new-keywords" class="form-input" placeholder="Từ khóa..."
+                            style="margin-bottom: 8px;">
+                        <div style="text-align: right;"><button class="btn btn-primary" onclick="addKnowledge()">Thêm
+                                Mới</button></div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: FILE UPLOAD -->
+                <div id="k-form-file" class="hidden">
+                    <div
+                        style="background: #eff6ff; padding: 20px; border-radius: 8px; border: 1px dashed #6366f1; text-align: center; margin-bottom: 20px;">
+                        <i class="fa-solid fa-cloud-arrow-up"
+                            style="font-size: 2rem; color: #6366f1; margin-bottom: 10px;"></i>
+                        <p style="margin-bottom: 10px; font-size: 0.9rem;">Hỗ trợ: PDF, DOCX, TXT, Ảnh</p>
+                        <input type="file" id="k-file-input" accept=".pdf,.docx,.txt,.jpg,.png" style="display: none;"
+                            onchange="handleFileSelect()">
+                        <button class="btn btn-secondary" onclick="document.getElementById('k-file-input').click()">Chọn
+                            File</button>
+                        <div id="file-name-display"
+                            style="margin-top: 10px; font-weight: 600; color: var(--text-main);"></div>
+                        <button id="btn-process-file" class="btn btn-primary hidden" style="margin-top: 10px;"
+                            onclick="uploadAndProcessFile()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Phân tích & Trích xuất
+                        </button>
+                    </div>
+
+                    <!-- Preview Area -->
+                    <div id="file-preview-area" class="hidden">
+                        <h4 style="margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span>Kết quả trích xuất (<span id="preview-count">0</span>)</span>
+                            <button class="btn btn-primary" onclick="saveBulkKnowledge()">Lưu Tất Cả</button>
+                        </h4>
+                        <div id="preview-list"
+                            style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIST -->
+                <h4 style="margin: 20px 0 10px;">Danh sách Tri thức hiện có</h4>
                 <div id="knowledge-list"></div>
             </div>
         </div>
@@ -1073,7 +1145,6 @@
                 });
 
                 if (res.ok) {
-                    // Login thành công
                     document.getElementById('admin-login-screen').classList.add('hidden');
                     document.getElementById('admin-app').classList.remove('hidden');
                     loadBotsAdmin();
@@ -1097,11 +1168,7 @@
             document.getElementById('admin-app').classList.add('hidden');
             document.getElementById('customer-app').classList.add('hidden');
             document.getElementById('admin-login-screen').classList.add('hidden');
-
-            // Hiện màn hình chọn role
             document.getElementById('role-screen').classList.remove('hidden');
-
-            // Reset input login
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
         }
@@ -1164,7 +1231,7 @@
         }
 
         function switchCreateTab(mode) {
-            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${mode}`).classList.add('active');
             if (mode === 'manual') {
                 document.getElementById('form-manual').classList.remove('hidden');
@@ -1248,14 +1315,30 @@
             btn.innerText = "Lưu Bot"; btn.disabled = false;
         }
 
-        // KNOWLEDGE & CUSTOMER (Keep simple logic)
+        // KNOWLEDGE & CUSTOMER & FILE UPLOAD
         let currentKBot = null;
+        let previewData = [];
+
+        function switchKnowledgeTab(mode) {
+            document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`ktab-${mode}`).classList.add('active');
+            if (mode === 'manual') {
+                document.getElementById('k-form-manual').classList.remove('hidden');
+                document.getElementById('k-form-file').classList.add('hidden');
+            } else {
+                document.getElementById('k-form-manual').classList.add('hidden');
+                document.getElementById('k-form-file').classList.remove('hidden');
+            }
+        }
+
         async function openKnowledgeModal(bot) {
             currentKBot = bot.code;
             document.getElementById('k-bot-name').innerText = bot.name;
+            switchKnowledgeTab('manual'); // Reset tab
             loadKList();
             document.getElementById('knowledge-modal').classList.remove('hidden');
         }
+
         async function loadKList() {
             const list = document.getElementById('knowledge-list');
             const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`);
@@ -1268,6 +1351,7 @@
                 </div>
             `).join('');
         }
+
         async function addKnowledge() {
             await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1279,11 +1363,80 @@
             document.getElementById('k-new-content').value = '';
             loadKList();
         }
+
         async function delK(id) {
             if (confirm("Xóa?")) {
                 await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' });
                 loadKList();
             }
+        }
+
+        function handleFileSelect() {
+            const file = document.getElementById('k-file-input').files[0];
+            if (file) {
+                document.getElementById('file-name-display').innerText = file.name;
+                document.getElementById('btn-process-file').classList.remove('hidden');
+            }
+        }
+
+        async function uploadAndProcessFile() {
+            const file = document.getElementById('k-file-input').files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('btn-process-file');
+            btn.innerText = "Processing..."; btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, {
+                    method: 'POST', body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    previewData = data.previewChunks;
+                    renderPreview();
+                    document.getElementById('file-preview-area').classList.remove('hidden');
+                } else alert(data.error);
+            } catch (e) { alert("Upload error"); }
+            btn.innerText = "Phân tích & Trích xuất"; btn.disabled = false;
+        }
+
+        function renderPreview() {
+            const container = document.getElementById('preview-list');
+            document.getElementById('preview-count').innerText = previewData.length;
+            container.innerHTML = previewData.map((item, index) => `
+                <div class="knowledge-item" style="border-left: 3px solid #6366f1;">
+                    <textarea class="form-input" style="font-size:0.85rem; margin-bottom:5px;" onchange="updatePreview(${index}, 'content', this.value)">${item.content}</textarea>
+                    <input type="text" class="form-input" style="font-size:0.8rem;" value="${item.keywords.join(', ')}" onchange="updatePreview(${index}, 'keywords', this.value)">
+                    <div style="text-align:right; margin-top:5px;"><button class="btn btn-ghost" style="color:red; font-size:0.7rem;" onclick="removePreviewItem(${index})">Xóa dòng này</button></div>
+                </div>
+            `).join('');
+        }
+
+        function updatePreview(index, field, value) {
+            if (field === 'keywords') previewData[index].keywords = value.split(',').map(s => s.trim());
+            else previewData[index].content = value;
+        }
+
+        function removePreviewItem(index) {
+            previewData.splice(index, 1);
+            renderPreview();
+        }
+
+        async function saveBulkKnowledge() {
+            if (previewData.length === 0) return alert("Empty");
+            try {
+                await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chunks: previewData })
+                });
+                alert("Saved!");
+                document.getElementById('file-preview-area').classList.add('hidden');
+                previewData = [];
+                loadKList();
+            } catch (e) { alert("Error"); }
         }
 
         async function openCustomerModal(bot) {

@@ -5,6 +5,9 @@ const Customer = require('../models/Customer');
 const KnowledgeChunk = require('../models/KnowledgeChunk');
 const botGenerator = require('../services/botGenerator');
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để xử lý nhanh
+const fileKnowledgeService = require('../services/fileKnowledgeService');
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -289,5 +292,59 @@ router.post('/login', (req, res) => {
     });
 });
 
-// ... các route còn lại (GET /bots, POST /bots...) giữ nguyên ...
+
+// ... (Các code cũ giữ nguyên)
+
+// [API 1] UPLOAD & PREVIEW (Đọc file -> Trả về danh sách JSON để Admin xem trước)
+router.post('/bots/:botCode/knowledge/upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: "Chưa chọn file" });
+
+        // 1. Đọc text từ file
+        const rawText = await fileKnowledgeService.extractTextFromFile(req.file);
+    
+        // 2. Dùng AI phân tích thành Chunks
+        const chunks = await fileKnowledgeService.generateChunksFromText(rawText);
+
+        res.json({
+            success: true,
+            previewChunks: chunks
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// [API 2] SAVE BULK (Lưu danh sách tri thức đã duyệt vào DB)
+router.post('/bots/:botCode/knowledge/bulk', async (req, res) => {
+    try {
+        const { botCode } = req.params;
+        const { chunks } = req.body; // Mảng [{content, keywords}, ...]
+
+        if (!Array.isArray(chunks) || chunks.length === 0) {
+            return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
+        }
+
+        const bot = await Bot.findOne({ code: botCode });
+        if (!bot) return res.status(404).json({ error: "Bot không tồn tại" });
+
+        // Map dữ liệu để lưu
+        const knowledgeDocs = chunks.map(c => ({
+            botId: bot._id,
+            content: c.content,
+            keywords: c.keywords || []
+        }));
+
+        // Insert many
+        await KnowledgeChunk.insertMany(knowledgeDocs);
+
+        res.json({
+            message: `Đã nhập thành công ${knowledgeDocs.length} tri thức mới!`
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 module.exports = router;
