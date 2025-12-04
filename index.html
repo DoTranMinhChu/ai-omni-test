@@ -1193,7 +1193,7 @@
                         <div class="generated-image bg-gray-200 w-full h-64 flex items-center justify-center text-gray-500 relative overflow-hidden"
                             id="img-preview-box"
                             style="background: #e2e8f0; height: 300px; width: 100%; max-width: 500px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                            <div id="img-placeholder-text">(Giả lập) Ảnh sẽ hiện ở đây</div>
+                            <div id="img-placeholder-text"></div>
                             <div id="img-loading-spinner" class="loading-spinner hidden absolute"></div>
                         </div>
                         <div class="prompt-box" id="final-prompt-display">Prompt AI...</div>
@@ -1619,31 +1619,82 @@
             document.getElementById('img-input-container').innerHTML = t.variables.map(v => `<div class="form-group"><label class="form-label">${v}</label><input type="text" class="form-input img-var-input" data-var="${v}"></div>`).join('');
         }
         async function generateImage() {
-            const btn = event.target;
+            const btn = event.target; // Sửa lại event.target nếu gọi từ on_click
             const originalText = btn.innerText;
-            btn.innerText = "Đang tạo..."; btn.disabled = true;
+
+            // 1. LOCK UI
+            btn.innerText = "Đang tạo...";
+            btn.disabled = true;
 
             // SHOW LOADING UI
-            document.getElementById('img-result-area').classList.remove('hidden');
-            document.getElementById('img-preview-box').style.opacity = '0.5';
-            document.getElementById('img-loading-spinner').classList.remove('hidden');
-            document.getElementById('img-placeholder-text').innerText = "Đang vẽ...";
+            const resultArea = document.getElementById('img-result-area');
+            const previewBox = document.getElementById('img-preview-box');
+            const spinner = document.getElementById('img-loading-spinner');
+            const placeholder = document.getElementById('img-placeholder-text');
 
-            const inputs = document.querySelectorAll('.img-var-input'); const vars = {}; inputs.forEach(i => vars[i.dataset.var] = i.value);
+            resultArea.classList.remove('hidden');
+            previewBox.style.opacity = '0.5';
+            spinner.classList.remove('hidden');
+            placeholder.innerHTML = "Đang vẽ..."; // Reset nội dung cũ
+
+            // 2. GATHER DATA
+            const inputs = document.querySelectorAll('.img-var-input');
+            const vars = {};
+            inputs.forEach(i => vars[i.dataset.var] = i.value);
+
             try {
-                const res = await fetch(`${API_URL}/image/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templateCode: currentTemplate.templateCode, variables: vars }) });
+                // 3. CALL API
+                const res = await fetch(`${API_URL}/image/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        templateCode: currentTemplate.templateCode, // Đảm bảo biến này tồn tại
+                        variables: vars
+                    })
+                });
+
+                if (!res.ok) throw new Error("Server error");
+
                 const data = await res.json();
 
-                document.getElementById('final-prompt-display').innerText = data.finalOptimizedPrompt;
-                // Nếu có ảnh thật: <img src="${data.url}" onload="hideSpinner()">
-                document.getElementById('img-placeholder-text').innerText = "(Giả lập) Ảnh đã tạo xong";
-            } catch (e) { alert("Lỗi"); }
+                // 4. DISPLAY RESULT
+                if (data.success && data.imageBase64) {
+                    // Hiển thị Prompt đã tối ưu
+                    document.getElementById('final-prompt-display').innerText = data.finalOptimizedPrompt;
 
-            // HIDE LOADING UI
-            document.getElementById('img-preview-box').style.opacity = '1';
-            document.getElementById('img-loading-spinner').classList.add('hidden');
-            btn.innerText = originalText; btn.disabled = false;
+                    // --- [FIX QUAN TRỌNG Ở ĐÂY] ---
+                    // Tạo chuỗi Base64 chuẩn (Imagen thường trả về PNG)
+                    const imgSrc = `data:image/png;base64,${data.imageBase64}`;
+
+                    // Chèn HTML string vào placeholder (Dùng dấu huyền ` `)
+                    placeholder.innerHTML = `
+                <img src="${imgSrc}" 
+                     alt="Generated Image" 
+                     style="display:block; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" 
+                     id="generated-result-img"
+                     onload="document.getElementById('img-loading-spinner').classList.add('hidden');"
+                />
+            `;
+                    // Ẩn spinner ngay lập tức (hoặc đợi onload ở trên)
+                    spinner.classList.add('hidden');
+                } else {
+                    alert("Lỗi: " + (data.error || "Không có dữ liệu ảnh"));
+                    placeholder.innerHTML = "Tạo ảnh thất bại.";
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert("Có lỗi xảy ra khi gọi API");
+                placeholder.innerHTML = "Lỗi kết nối.";
+            } finally {
+                // 5. UNLOCK UI
+                previewBox.style.opacity = '1';
+                spinner.classList.add('hidden'); // Đảm bảo tắt spinner dù thành công hay thất bại
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
+
     </script>
 </body>
 

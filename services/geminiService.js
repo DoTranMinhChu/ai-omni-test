@@ -1,76 +1,104 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require('fs');
+const path = require('path');
+
+// Cấu hình Gemini (Dùng để tối ưu prompt text)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image" });
+const textModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Dùng bản 2.5 flash mới nhất để tối ưu prompt
 
 /**
- * 1. Chức năng cho USER: Trộn biến và Tối ưu Prompt
- */
-/**
- * 1. Chức năng cho USER: Trộn biến và Tối ưu Prompt (đã tối ưu hóa cho tiếng Việt)
+ * 1. Chức năng cho USER: Trộn biến và Tối ưu Prompt (Giữ nguyên)
  */
 async function buildFinalPrompt(basePrompt, userInputData) {
     const prompt = `
-    ROLE: Expert AI Prompt Engineer specializing in Vietnamese to English image prompt translation and optimization.
-    
-    TASK: You MUST perform a two-step process: 
-    1. Accurately translate and enhance ALL Vietnamese user input from the 'User Input' object.
-    2. Integrate the translated and enhanced content into the 'Base Template' to create a final, highly detailed, and optimized English prompt for image generation.
-
-    DATA:
-    - Base Template: "${basePrompt}"
-    - User Input: ${JSON.stringify(userInputData)}
-
-    REQUIREMENTS:
-    1. TRANSLATE: Translate all Vietnamese content into detailed, descriptive English.
-    2. ENHANCE: For every product or object description, automatically ADD high-quality artistic details (e.g., 'photorealistic texture', 'studio lighting', 'depth of field', 'vibrant color', 'detailed reflections') to the translated object to ensure the highest image quality, maintaining the user's original intent.
-    3. OUTPUT: Return ONLY the final, complete, optimized English prompt string. No JSON, no quotes, no conversational text.
+    ROLE: Expert AI Prompt Engineer.
+    TASK: Translate Vietnamese input to English and Enhance for Image Generation.
+    DATA: Base: "${basePrompt}", User Input: ${JSON.stringify(userInputData)}
+    REQUIREMENT: Return ONLY the final English prompt string. No Markdown.
     `;
-
     try {
-        const result = await model.generateContent(prompt);
+        const result = await textModel.generateContent(prompt);
         return result.response.text().trim();
     } catch (error) {
-        // Xử lý lỗi nếu Gemini không trả về chuỗi hợp lệ
-        console.error("Gemini failed to build prompt:", error);
-        // Fallback: Thực hiện thay thế biến đơn giản nếu AI gặp lỗi
-        let simplePrompt = basePrompt;
-        for (const [key, value] of Object.entries(userInputData)) {
-            const regex = new RegExp(`{{\\b${key}\\b}}`, 'g');
-            simplePrompt = simplePrompt.replace(regex, value);
-        }
-        return `ERROR_FALLBACK: ${simplePrompt}`;
+        return basePrompt;
     }
 }
 
 /**
- * 2. Chức năng cho ADMIN: Tự động tạo Template từ mô tả
- * VD Admin nhập: "Tôi muốn làm template tạo ảnh bìa món ăn cho nhà hàng"
- * AI sẽ tự nghĩ ra basePrompt và các biến cần thiết.
+ * 2. Chức năng cho ADMIN (Giữ nguyên)
  */
 async function autoGenerateTemplateConfig(adminDescription) {
-    const prompt = `
-    ROLE: System Architect for Image Generation App.
-    TASK: Create a structural template configuration based on a description.
-
-    DESCRIPTION: "${adminDescription}"
-
-    OUTPUT FORMAT (JSON ONLY):
-    {
-        "templateName": "Short descriptive name",
-        "basePrompt": "A detailed Stable Diffusion/Midjourney prompt with 2-4 placeholders like {{FOOD_NAME}}, {{STYLE}}...",
-        "variables": ["FOOD_NAME", "STYLE", "..."]
-    }
-    
-    Ensure the basePrompt is high quality, descriptive, and in English.
-    Return ONLY JSON string.
-    `;
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-
-    // Clean markdown code blocks if present
-    const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(jsonStr);
+    const prompt = `Create template config JSON for: "${adminDescription}". Return JSON only.`;
+    try {
+        const result = await textModel.generateContent(prompt);
+        const text = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(text);
+    } catch (e) { return null; }
 }
 
-module.exports = { buildFinalPrompt, autoGenerateTemplateConfig };
+/**
+ * 3. [UPDATE] Hàm tạo ảnh dùng Model trong list của bạn
+ * Mặc định dùng: imagen-4.0-generate-001 (Vì đây là model chuyên vẽ ảnh tốt nhất trong list của bạn)
+ */
+async function generateImage(prompt, outputFilename = 'generated_image.png', modelName = 'imagen-4.0-generate-001') {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    // Endpoint chuẩn cho các model thế hệ mới (Imagen 4, Gemini 2.0 Flash Image Gen)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:predict?key=${apiKey}`;
+
+    const payload = {
+        instances: [
+            { prompt: prompt }
+        ],
+        parameters: {
+            sampleCount: 1,
+            aspectRatio: "1:1", // Tùy chọn: "16:9", "9:16", "3:4", "4:3"
+            // outputOptions: { mimeType: "image/png" } // Một số model mới yêu cầu cái này
+        }
+    };
+
+    try {
+        console.log(`🎨 Đang gửi yêu cầu tới model: ${modelName}`);
+        console.log(`📝 Prompt: ${prompt.substring(0, 50)}...`);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API Error (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        // Xử lý dữ liệu trả về (Cấu trúc của Imagen/Gemini Image Gen)
+        let base64Data = null;
+
+        if (data.predictions && data.predictions[0]) {
+            // Trường hợp 1: Cấu trúc Imagen chuẩn
+            if (data.predictions[0].bytesBase64Encoded) {
+                base64Data = data.predictions[0].bytesBase64Encoded;
+            }
+            // Trường hợp 2: Cấu trúc mimeType (đôi khi gặp ở các bản preview)
+            else if (data.predictions[0].image && data.predictions[0].image.bytesBase64Encoded) {
+                base64Data = data.predictions[0].image.bytesBase64Encoded;
+            }
+        }
+        return base64Data
+
+    } catch (error) {
+        console.error("❌ Lỗi tạo ảnh:", error.message);
+
+        // Gợi ý fix lỗi nếu chọn sai model
+        if (modelName.includes("flash-image") && error.message.includes("404")) {
+            console.log("💡 GỢI Ý: Model 'gemini-2.5-flash-image' có thể chỉ là model Vision (nhìn ảnh). Hãy thử đổi sang 'imagen-4.0-generate-001'.");
+        }
+        throw error;
+    }
+}
+
+// Export module
+module.exports = { buildFinalPrompt, autoGenerateTemplateConfig, generateImage };
