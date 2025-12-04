@@ -336,7 +336,7 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             overflow-y: auto;
-            height: 100%;
+            /* height: 100%; */
         }
 
         .card {
@@ -348,6 +348,12 @@
             transition: 0.2s;
             display: flex;
             flex-direction: column;
+
+        }
+
+        .card> :last-child {
+            margin-top: auto;
+            /* Đẩy xuống cuối */
         }
 
         .card:hover {
@@ -370,7 +376,7 @@
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.6em;
+            max-height: 2.6em;
             flex: 1;
         }
 
@@ -389,6 +395,7 @@
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 600;
+            height: fit-content;
         }
 
         /* FORMS & MODALS */
@@ -949,6 +956,69 @@
             word-wrap: break-word;
         }
 
+        /* UI cho danh sách biến số động ở Admin */
+        .var-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        /* UI Client Form cuộn đẹp */
+        #img-input-container {
+            max-height: 400px;
+            /* Giới hạn chiều cao */
+            overflow-y: auto;
+            /* Cho phép cuộn */
+            padding-right: 5px;
+            /* Tránh thanh cuộn che nội dung */
+            margin-bottom: 15px;
+        }
+
+        /* Scrollbar mảnh */
+        #img-input-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #img-input-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #img-input-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Grid lịch sử ảnh */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.8rem;
+        }
+
+        .history-img-placeholder {
+            width: 100%;
+            height: 150px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .app-layout {
@@ -1298,20 +1368,38 @@
                             id="tauto-code" class="form-input" placeholder="FOOD_MENU_01"></div>
                 </div>
 
+                <!-- Trong #template-modal .modal-body -->
                 <div id="tform-manual">
+                    <input type="hidden" id="tman-id">
                     <div class="flex gap-4">
                         <div class="form-group w-full"><label class="form-label">Tên Template</label><input type="text"
                                 id="tman-name" class="form-input"></div>
                         <div class="form-group w-full"><label class="form-label">Mã Code</label><input type="text"
                                 id="tman-code" class="form-input"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">Base Prompt (Chứa {{VAR}})</label><textarea
-                            id="tman-prompt" class="form-input"
-                            placeholder="A photo of {{PRODUCT}} on {{BACKGROUND}}..."></textarea></div>
-                    <div class="form-group"><label class="form-label">Biến số (Cách nhau dấu phẩy)</label><input
-                            type="text" id="tman-vars" class="form-input" placeholder="PRODUCT, BACKGROUND"></div>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Mô tả</label>
+                        <textarea id="tman-description" class="form-input"
+                            style="min-height: 100px; font-family: monospace;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Base Prompt (Tiếng Anh, chứa {{KEY}})</label>
+                        <textarea id="tman-prompt" class="form-input"
+                            style="min-height: 100px; font-family: monospace;"></textarea>
+                    </div>
 
+                    <!-- Quản lý biến số -->
+                    <div class="form-group">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="form-label">Danh sách Biến số (Inputs)</label>
+                            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px;"
+                                onclick="addVarRow()">+ Thêm biến</button>
+                        </div>
+                        <div id="tman-vars-container" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Rows sẽ được JS thêm vào đây -->
+                        </div>
+                    </div>
+                </div>
                 <div class="flex justify-end mt-4">
                     <button class="btn btn-primary" onclick="submitTemplate()" id="btn-save-template">Lưu
                         Template</button>
@@ -1319,7 +1407,23 @@
             </div>
         </div>
     </div>
+    <!-- Thêm vào #view-admin-image -->
+    <div class="tabs mt-4">
+        <div class="tab-item active" onclick="switchImgAdminTab('list')">Danh sách Template</div>
+        <div class="tab-item" onclick="switchImgAdminTab('history')">Lịch sử Tạo ảnh</div>
+    </div>
 
+    <div id="admin-img-list-area">
+        <div class="grid-container" id="template-grid"></div>
+    </div>
+
+    <div id="admin-img-history-area" class="hidden" style="padding: 20px;">
+        <div class="flex gap-2 mb-4">
+            <input id="hist-search-user" class="form-input" placeholder="Lọc theo User ID..." style="width: 200px;">
+            <button class="btn btn-primary" onclick="loadAdminImageHistory()">Tìm kiếm</button>
+        </div>
+        <div id="image-history-grid" class="history-grid"></div>
+    </div>
     <!-- MODAL 3: KNOWLEDGE (ADMIN) -->
     <div id="knowledge-modal" class="modal-overlay hidden">
         <div class="modal">
@@ -1462,29 +1566,169 @@
 
         // --- ADMIN: IMAGE TEMPLATE ---
         async function loadAdminTemplates() {
-            const grid = document.getElementById('template-grid'); grid.innerHTML = 'Loading...';
-            const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json();
-            grid.innerHTML = temps.map(t => `<div class="card"><div class="card-header"><span>${t.templateName}</span><span class="badge">${t.templateCode}</span></div><div class="card-desc">${t.basePrompt}</div><div style="font-size:0.8rem;color:var(--primary);margin-top:5px;">Vars: ${t.variables.join(', ')}</div></div>`).join('');
+            const grid = document.getElementById('template-grid');
+            grid.innerHTML = '<div class="loading-spinner"></div>'; // Hiển thị loading
+
+            try {
+                const res = await fetch(`${API_URL}/admin/image-template`);
+                const temps = await res.json();
+
+                if (temps.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; color:gray; width:100%;">Chưa có template nào.</p>';
+                    return;
+                }
+
+                // --- ĐÂY LÀ CHỖ GỌI HÀM ---
+                // Duyệt qua mảng templates và gọi renderAdminTemplateCard cho từng phần tử
+                grid.innerHTML = temps.map(t => renderAdminTemplateCard(t)).join('');
+
+            } catch (e) {
+                console.error(e);
+                grid.innerHTML = 'Lỗi tải dữ liệu.';
+            }
         }
-        function openTemplateModal() { document.getElementById('template-modal').classList.remove('hidden'); }
+        // Hàm helper để tạo HTML cho từng thẻ Template
+        function renderAdminTemplateCard(t) {
+            // Xử lý hiển thị danh sách biến (Variables)
+
+            // Trả về chuỗi HTML
+            return `
+        <div class="card">
+            <div class="card-header">
+                <span>${t.templateName}</span>
+                <span class="badge">${t.templateCode}</span>
+            </div>
+            <div class="card-desc" style="font-family:monospace; font-size:0.8rem; background:#f8fafc; padding:8px; border-radius:4px; margin-bottom:10px;">
+                ${t.description || ""}
+            </div>
+           
+            <div class="card-actions">
+                <button class="btn btn-secondary" onclick='deleteTemplate("${t._id}")' style="color:red; font-size:0.8rem;">
+                    <i class="fa-solid fa-trash"></i> Xóa
+                </button>
+                <button class="btn btn-secondary" onclick='openEditTemplate(${JSON.stringify(t)})' style="color:var(--primary); font-size:0.8rem;">
+                    <i class="fa-solid fa-pen"></i> Sửa
+                </button>
+            </div>
+        </div>
+    `;
+        }
+        // async function loadAdminTemplates() {
+        //     const grid = document.getElementById('template-grid'); grid.innerHTML = 'Loading...';
+        //     const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json();
+        //     grid.innerHTML = temps.map(t => `<div class="card"><div class="card-header"><span>${t.templateName}</span><span class="badge">${t.templateCode}</span></div><div class="card-desc">${t.description}</div><div style="font-size:0.8rem;color:var(--primary);margin-top:5px;">Vars: ${t.variables.map(item => item.label).filter(item => !!item).join(', ')}</div></div>`).join('');
+        // }
         function switchTemplateMode(mode) {
             document.querySelectorAll('#template-modal .tab-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`tmode-${mode}`).classList.add('active');
             document.getElementById('tform-manual').classList.toggle('hidden', mode === 'auto');
             document.getElementById('tform-auto').classList.toggle('hidden', mode === 'manual');
         }
-        async function submitTemplate() {
-            const isAuto = !document.getElementById('tform-auto').classList.contains('hidden');
-            const payload = {
-                type: isAuto ? 'AUTO' : 'MANUAL',
-                templateCode: isAuto ? document.getElementById('tauto-code').value : document.getElementById('tman-code').value,
-                description: isAuto ? document.getElementById('tauto-desc').value : null,
-                manualData: isAuto ? null : { templateName: document.getElementById('tman-name').value, basePrompt: document.getElementById('tman-prompt').value, variables: document.getElementById('tman-vars').value.split(',').map(s => s.trim()) }
-            };
-            await fetch(`${API_URL}/admin/image-template`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            closeModal('template-modal'); loadAdminTemplates();
+        // --- ADMIN: TEMPLATE VARIABLES UI ---
+        function addVarRow(key = '', label = '') {
+            const container = document.getElementById('tman-vars-container');
+            const id = Date.now();
+            const html = `
+        <div class="var-row" id="row-${id}">
+            <input type="text" class="form-input var-key" placeholder="KEY (VD: FOOD)" value="${key}" style="flex:1; font-family:monospace; font-weight:bold;">
+            <input type="text" class="form-input var-label" placeholder="Nhãn hiển thị (VD: Món ăn)" value="${label}" style="flex:1;">
+            <button class="btn-icon" onclick="document.getElementById('row-${id}').remove()" style="color:red; width:30px; height:30px;"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `;
+            container.insertAdjacentHTML('beforeend', html);
         }
 
+        // Hàm mở Modal Tạo mới
+        function openTemplateModal() {
+            document.getElementById('tman-id').value = ''; // Reset ID
+            document.getElementById('tman-name').value = '';
+            document.getElementById('tman-code').value = '';
+            document.getElementById('tman-code').disabled = false; // Code được sửa khi tạo mới
+            document.getElementById('tman-prompt').value = '';
+            document.getElementById('tman-description').value = '';
+            document.getElementById('tman-vars-container').innerHTML = '';
+            addVarRow('PRODUCT', 'Tên sản phẩm'); // Dòng mẫu
+
+            document.getElementById('template-modal').classList.remove('hidden');
+            switchTemplateMode('manual');
+        }
+
+        // Hàm mở Modal Edit
+        function openEditTemplate(t) {
+            document.getElementById('tman-id').value = t._id;
+            document.getElementById('tman-name').value = t.templateName;
+            document.getElementById('tman-code').value = t.templateCode;
+            document.getElementById('tman-code').disabled = true; // Không sửa code
+            document.getElementById('tman-prompt').value = t.basePrompt;
+            document.getElementById('tman-description').value = t?.description || "";
+            const container = document.getElementById('tman-vars-container');
+            container.innerHTML = '';
+            if (t.variables && t.variables.length > 0) {
+                t.variables.forEach(v => addVarRow(v.key, v.label));
+            } else {
+                // Fallback cho data cũ (nếu variables là mảng string)
+                if (typeof t.variables[0] === 'string') {
+                    t.variables.forEach(v => addVarRow(v, v));
+                }
+            }
+
+            document.getElementById('template-modal').classList.remove('hidden');
+            switchTemplateMode('manual');
+        }
+
+        // Hàm Submit (Tạo mới hoặc Update)
+        async function submitTemplate() {
+            const isAuto = !document.getElementById('tform-auto').classList.contains('hidden');
+            const id = document.getElementById('tman-id').value; // Nếu có ID là edit
+            const method = (id && !isAuto) ? 'PUT' : 'POST';
+            const url = (id && !isAuto) ? `${API_URL}/admin/image-template/${id}` : `${API_URL}/admin/image-template`;
+
+            let payload = {};
+
+            if (isAuto) {
+                // ... (Logic auto giữ nguyên, server sẽ xử lý)
+                payload = { type: 'AUTO', templateCode: document.getElementById('tauto-code').value, description: document.getElementById('tauto-desc').value };
+            } else {
+                // Lấy dữ liệu variables từ các dòng
+                const vars = [];
+                document.querySelectorAll('.var-row').forEach(row => {
+                    const key = row.querySelector('.var-key').value.trim();
+                    const label = row.querySelector('.var-label').value.trim();
+                    if (key && label) vars.push({ key, label });
+                });
+
+                if (vars.length === 0) return alert("Cần ít nhất 1 biến số!");
+
+                payload = {
+                    type: 'MANUAL',
+                    templateCode: document.getElementById('tman-code').value,
+                    manualData: {
+                        templateName: document.getElementById('tman-name').value,
+                        basePrompt: document.getElementById('tman-prompt').value,
+                        description: document.getElementById('tman-description').value,
+                        variables: vars // Gửi mảng object
+                    }
+                };
+            }
+
+            try {
+                const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (res.ok) {
+                    closeModal('template-modal');
+                    loadAdminTemplates();
+                    alert("Lưu thành công!");
+                } else {
+                    alert("Lỗi khi lưu");
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Hàm Xóa Template
+        async function deleteTemplate(id) {
+            if (!confirm("Bạn chắc chắn muốn xóa?")) return;
+            await fetch(`${API_URL}/admin/image-template/${id}`, { method: 'DELETE' });
+            loadAdminTemplates();
+        }
         // --- ADMIN: KNOWLEDGE & CUSTOMER ---
         let currentKBot = null; let previewData = [];
         function switchKnowledgeTab(mode) { document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`ktab-${mode}`).classList.add('active'); document.getElementById('k-form-manual').classList.toggle('hidden', mode !== 'manual'); document.getElementById('k-form-file').classList.toggle('hidden', mode !== 'file'); document.getElementById('k-form-url').classList.toggle('hidden', mode !== 'url'); }
@@ -1598,7 +1842,52 @@
                 alert("Lỗi mạng");
             }
         }
+        function switchImgAdminTab(tab) {
+            if (tab === 'list') {
+                document.getElementById('admin-img-list-area').classList.remove('hidden');
+                document.getElementById('admin-img-history-area').classList.add('hidden');
+            } else {
+                document.getElementById('admin-img-list-area').classList.add('hidden');
+                document.getElementById('admin-img-history-area').classList.remove('hidden');
+                loadAdminImageHistory();
+            }
+        }
 
+        async function loadAdminImageHistory() {
+            const userId = document.getElementById('hist-search-user').value;
+            const grid = document.getElementById('image-history-grid');
+            grid.innerHTML = '<div class="loading-spinner"></div>';
+
+            let url = `${API_URL}/admin/generated-images`;
+            if (userId) url += `?userId=${userId}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Chưa có dữ liệu.</p>';
+                    return;
+                }
+
+                grid.innerHTML = data.map(item => `
+            <div class="history-item">
+                <div class="history-img-placeholder">
+                    ${item.imageUrl ? `<img src="${item.imageUrl}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fa-solid fa-image fa-2x"></i>'}
+                </div>
+                <div style="padding:10px;">
+                    <div style="font-weight:bold; margin-bottom:4px;">${item.templateCode}</div>
+                    <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">User: ${item.userId}</div>
+                    <div style="font-size:0.75rem; color:#94a3b8;">${new Date(item.createdAt).toLocaleString()}</div>
+                    <div style="margin-top:8px; font-size:0.75rem; border-top:1px solid #f1f5f9; padding-top:4px;">
+                        ${Object.entries(item.variablesUsed || {}).map(([k, v]) => `<b>${k}:</b> ${v}`).join('<br>')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+            } catch (e) { console.error(e); }
+        }
         function renderMsg(msg) {
             const isUser = msg.role === 'user';
             let meta = '';
@@ -1612,12 +1901,35 @@
         // CUSTOMER IMAGE
         let currentTemplate = null;
         async function loadCustTemplates() { const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json(); document.getElementById('cust-template-list').innerHTML = temps.map(t => `<div class="template-item" onclick='selectTemplate(${JSON.stringify(t)})'><strong>${t.templateName}</strong></div>`).join(''); }
+        // --- CLIENT: RENDER FORM ---
         function selectTemplate(t) {
             currentTemplate = t;
-            document.getElementById('img-empty-state').classList.add('hidden'); document.getElementById('img-form-area').classList.remove('hidden');
+            document.getElementById('img-empty-state').classList.add('hidden');
+            document.getElementById('img-form-area').classList.remove('hidden');
             document.getElementById('form-template-name').innerText = t.templateName;
-            document.getElementById('img-input-container').innerHTML = t.variables.map(v => `<div class="form-group"><label class="form-label">${v}</label><input type="text" class="form-input img-var-input" data-var="${v}"></div>`).join('');
+
+            // Render Variables Inputs
+            const container = document.getElementById('img-input-container');
+            container.innerHTML = t.variables.map(v => `
+        <div class="form-group">
+            <label class="form-label" style="font-size: 0.9rem; color: var(--text-main);">
+                ${v.label} <span style="font-weight:normal; color:#94a3b8; font-size:0.8rem;">(${v.key})</span>
+            </label>
+            <input type="text" class="form-input img-var-input" 
+                   data-var="${v.key}" 
+                   placeholder="Nhập ${v.label.toLowerCase()}..."
+                   style="padding: 12px;">
+        </div>
+    `).join('');
         }
+
+        // --- CLIENT: GENERATE CALL ---
+        // Khi gọi API, nhớ truyền thêm userId
+        // body: JSON.stringify({ 
+        //     templateCode: currentTemplate.templateCode, 
+        //     variables: vars,
+        //     userId: document.getElementById('cust-id').value // Thêm cái này
+        // })
         async function generateImage() {
             const btn = event.target; // Sửa lại event.target nếu gọi từ on_click
             const originalText = btn.innerText;

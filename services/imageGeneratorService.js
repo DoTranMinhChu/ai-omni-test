@@ -43,8 +43,15 @@ async function buildFinalPrompt(basePrompt, userInputData) {
 async function autoGenerateTemplateConfig(description) {
     const prompt = `
     Create a JSON image generation template based on: "${description}".
-    Format: { "templateName": "", "basePrompt": "English prompt with {{VARS}}", "variables": ["VAR1"] }
-    Return JSON only.
+    OUTPUT FORMAT (JSON ONLY):
+    {
+        "templateName": "Tên tiếng Việt hấp dẫn",
+        "basePrompt": "Prompt tiếng Anh có chứa {{KEY}}...",
+        "variables": [
+            { "key": "KEY_1", "label": "Nhãn hiển thị tiếng Việt 1" },
+            { "key": "KEY_2", "label": "Nhãn hiển thị tiếng Việt 2" }
+        ]
+    }
     `;
     try {
         const result = await textModel.generateContent(prompt);

@@ -9,6 +9,7 @@ const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để xử lý nhanh
 const fileKnowledgeService = require('../services/fileKnowledgeService');
 const geminiService = require('../services/geminiService')
+const GeneratedImage = require('../models/GeneratedImage')
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -420,5 +421,28 @@ router.post('/image-template', async (req, res) => {
 router.get('/image-template', async (req, res) => {
     const templates = await ImageTemplate.find();
     res.json(templates);
+});
+
+router.delete('/image-template/:id', async (req, res) => {
+    await ImageTemplate.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+});
+
+// UPDATE
+router.put('/image-template/:id', async (req, res) => {
+    const { templateName, basePrompt, variables } = req.body;
+    await ImageTemplate.findByIdAndUpdate(req.params.id, {
+        templateName, basePrompt, variables
+    });
+    res.json({ success: true });
+});
+router.get('/generated-images', async (req, res) => {
+    const { userId, templateCode } = req.query;
+    let filter = {};
+    if (userId) filter.userId = userId;
+    if (templateCode) filter.templateCode = templateCode;
+
+    const images = await GeneratedImage.find(filter).sort({ createdAt: -1 }).limit(50);
+    res.json(images);
 });
 module.exports = router;

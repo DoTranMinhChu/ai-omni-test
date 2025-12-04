@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ImageTemplate = require('../models/ImageTemplate');
 const geminiService = require('../services/geminiService'); // Service tối ưu prompt (Text)
-
+const GeneratedImage = require('../models/GeneratedImage');
 
 // API Tạo ảnh
 router.post('/generate', async (req, res) => {
@@ -21,7 +21,7 @@ router.post('/generate', async (req, res) => {
             return res.status(400).json({ error: `Thiếu biến: ${missingVars.join(', ')}` });
         }
 
-      
+
         // 3. Tối ưu Prompt (Vẫn dùng logic cũ của bạn)
         const finalPrompt = await geminiService.buildFinalPrompt(template.basePrompt, variables);
 
@@ -29,6 +29,14 @@ router.post('/generate', async (req, res) => {
         // Lưu ý: Kết quả trả về là Base64 String
         const imageBase64 = await geminiService.generateImage(finalPrompt);
 
+        await GeneratedImage.create({
+            userId: userId || 'GUEST',
+            templateCode,
+            finalPrompt,
+            variablesUsed: variables,
+            imageType: "BASE64",
+            imageUrl: imageBase64
+        });
         // 5. Trả về kết quả
         return res.json({
             success: true,
