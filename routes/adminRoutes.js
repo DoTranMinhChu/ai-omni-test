@@ -297,14 +297,15 @@ router.post('/login', (req, res) => {
 // ... (Các code cũ giữ nguyên)
 
 // [API 1] UPLOAD & PREVIEW (Đọc file -> Trả về danh sách JSON để Admin xem trước)
+// [API] UPLOAD & PREVIEW
 router.post('/bots/:botCode/knowledge/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: "Chưa chọn file" });
 
-        // 1. Đọc text từ file
-        const rawText = await fileKnowledgeService.extractTextFromFile(req.file);
+        // Service mới tự động phát hiện loại file và xử lý (Markdown, Table, OCR...)
+        const rawText = await fileKnowledgeService.processInput(req.file);
 
-        // 2. Dùng AI phân tích thành Chunks
+        // Gửi cho AI
         const chunks = await fileKnowledgeService.generateChunksFromText(rawText);
 
         res.json({
@@ -313,10 +314,25 @@ router.post('/bots/:botCode/knowledge/upload', upload.single('file'), async (req
         });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error(err);
+        res.status(500).json({ error: "Lỗi xử lý file: " + err.message });
     }
 });
 
+// [API MỚI] XỬ LÝ URL (Thêm vào adminRoutes.js)
+router.post('/bots/:botCode/knowledge/url', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) return res.status(400).json({ error: "Thiếu URL" });
+
+        const rawText = await fileKnowledgeService.processInput(url);
+        const chunks = await fileKnowledgeService.generateChunksFromText(rawText);
+
+        res.json({ success: true, previewChunks: chunks });
+    } catch (err) {
+        res.status(500).json({ error: "Lỗi xử lý URL: " + err.message });
+    }
+});
 // [API 2] SAVE BULK (Lưu danh sách tri thức đã duyệt vào DB)
 router.post('/bots/:botCode/knowledge/bulk', async (req, res) => {
     try {

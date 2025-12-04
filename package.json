@@ -9,17 +9,21 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@mozilla/readability": "^0.6.0",
     "adm-zip": "^0.5.16",
-    "axios": "^1.6.2",
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.21.2",
+    "jsdom": "^27.2.0",
     "mammoth": "^1.11.0",
     "mongoose": "^8.0.3",
     "multer": "^2.0.2",
     "ngrok": "^5.0.0-beta.2",
     "pdf-parse": "^2.4.5",
-    "tesseract.js": "^6.0.1"
+    "tesseract.js": "^6.0.1",
+    "turndown": "^7.2.2",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
