@@ -10,6 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để x�
 const fileKnowledgeService = require('../services/fileKnowledgeService');
 const geminiService = require('../services/geminiService')
 const GeneratedImage = require('../models/GeneratedImage')
+const imageGeneratorSerivce = require('../services/imageGeneratorService')
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -378,7 +379,7 @@ router.post('/image-template', async (req, res) => {
             // Case 1: AI tự nghĩ ra cấu trúc dựa trên mô tả
             if (!description) return res.status(400).json({ error: 'Cần mô tả cho AI' });
 
-            const aiConfig = await geminiService.autoGenerateTemplateConfig(description);
+            const aiConfig = await geminiService.autoGenerateTemplateImageConfig(description);
 
             newTemplateData = {
                 templateCode: templateCode, // Admin vẫn phải đặt mã code

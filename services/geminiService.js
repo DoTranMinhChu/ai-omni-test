@@ -23,6 +23,88 @@ async function buildFinalPrompt(basePrompt, userInputData) {
         return basePrompt;
     }
 }
+async function autoGenerateTemplateImageConfig(adminDescription) {
+    // 1. Định nghĩa cấu trúc chuẩn (Golden Standard) để AI học theo
+    const exampleStructure = `
+    1. TÊN TEMPLATE
+    Thiết Kế Ảnh Bán Hàng 1:1 – 3 Sản Phẩm (Chuẩn Tiếng Việt)
+
+    2. MÃ CODE
+    FB_1x1_3IMG_VN_FONTSAFE
+
+    3. BASE PROMPT (BẢN HOÀN THIỆN – CHUẨN TIẾNG VIỆT, CHỐNG LỖI FONT)
+    Tạo một thiết kế quảng cáo... dựa trên: {{PRODUCT_1}}...
+    
+    Yêu cầu chặt chẽ đối với chữ trên thiết kế:
+    • Tất cả text trên hình phải dùng tiếng Việt chuẩn Unicode.
+    • Không được sai chính tả, không thiếu dấu, không lỗi font.
+    • Phải thể hiện đúng nguyên văn HEADLINE và SLOGAN.
+    
+    Text hiển thị:
+    • HEADLINE lớn: "{{HEADLINE}}"
+    • SLOGAN nhỏ: "{{SLOGAN}}"
+
+    4. BIẾN SỐ
+    PRODUCT_1, HEADLINE, SLOGAN...
+
+    5. GỢI Ý DỮ LIỆU CHUẨN
+    HEADLINE: Sale Sập Sàn...
+
+    6. VÌ SAO BẢN NÀY TỐI ƯU?
+    ...
+    `;
+
+    // 2. Tạo Prompt yêu cầu Gemini đóng vai chuyên gia
+    const prompt = `
+    ROLE: Expert AI Prompt Engineer for Image Generation (Vietnamese Market).
+    TASK: Analyze the user's description and generate a specialized JSON configuration for an Image Generation Template.
+
+    USER DESCRIPTION: "${adminDescription}"
+
+    REQUIREMENTS:
+    1.  **Analyze**: Determine necessary variables (e.g., PRODUCT_NAME, DISCOUNT, BACKGROUND, MODEL_GENDER) based on the description.
+    2.  **Construct 'basePrompt'**: It MUST follow the "6-SECTION STRUCTURE" strictly.
+        -   **Section 3 (IMPORTANT)**: Must include the "Anti-Font-Error Boilerplate" (Yêu cầu chặt chẽ đối với chữ... Unicode... Không lỗi font). This is mandatory for Vietnamese text.
+        -   Variables in prompt must be in uppercase double curly braces: {{VARIABLE_NAME}}.
+    3.  **Construct 'variables'**: An array of objects with 'key' and Vietnamese 'label'.
+
+    OUTPUT FORMAT (JSON ONLY - NO MARKDOWN):
+    {
+        "templateName": "Tên tiếng Việt hấp dẫn (VD: Poster Khai Trương Quán Cafe)",
+        "basePrompt": "The full 6-section text string (sections 1,2,3,4,5,6) similar to the Example below.",
+        "variables": [
+            { "key": "HEADLINE", "label": "Tiêu đề chính" },
+            { "key": "THEME", "label": "Chủ đề (VD: Giáng sinh)" }
+            // ... Add other variables relevant to the description
+        ]
+    }
+
+    REFERENCE EXAMPLE FOR 'basePrompt' CONTENT (Mimic this style):
+    """
+    ${exampleStructure}
+    """
+    
+    Ensure the JSON is valid. Keys in 'variables' must match {{KEYS}} in 'basePrompt'.
+    `;
+
+    try {
+        const result = await textModel.generateContent(prompt);
+        const text = result.response.text();
+
+        // Clean JSON string (tránh trường hợp AI trả về ```json ... ```)
+        const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        return JSON.parse(jsonStr);
+    } catch (error) {
+        console.error("Gemini Auto-Gen Error:", error);
+        // Fallback đơn giản nếu lỗi
+        return {
+            templateName: "Auto Generated Template (Error Fallback)",
+            basePrompt: `An image based on: ${adminDescription}. Details: {{DETAILS}}`,
+            variables: [{ key: "DETAILS", label: "Chi tiết mô tả" }]
+        };
+    }
+}
 
 /**
  * 2. Chức năng cho ADMIN (Giữ nguyên)
@@ -101,4 +183,4 @@ async function generateImage(prompt, outputFilename = 'generated_image.png', mod
 }
 
 // Export module
-module.exports = { buildFinalPrompt, autoGenerateTemplateConfig, generateImage };
+module.exports = { buildFinalPrompt, autoGenerateTemplateConfig, generateImage, autoGenerateTemplateImageConfig };
