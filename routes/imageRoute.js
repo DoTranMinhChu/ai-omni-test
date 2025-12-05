@@ -7,7 +7,7 @@ const GeneratedImage = require('../models/GeneratedImage');
 // API Tạo ảnh
 router.post('/generate', async (req, res) => {
     try {
-        const { templateCode, variables } = req.body;
+        const { templateCode, variables, userId } = req.body;
 
         // 1. Tìm Template
         const template = await ImageTemplate.findOne({ templateCode });

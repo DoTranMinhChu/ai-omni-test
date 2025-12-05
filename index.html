@@ -1939,6 +1939,7 @@
             btn.disabled = true;
 
             // SHOW LOADING UI
+            const currentUserId = document.getElementById('cust-id').value;
             const resultArea = document.getElementById('img-result-area');
             const previewBox = document.getElementById('img-preview-box');
             const spinner = document.getElementById('img-loading-spinner');
@@ -1961,7 +1962,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         templateCode: currentTemplate.templateCode, // Đảm bảo biến này tồn tại
-                        variables: vars
+                        variables: vars,
+                        userId: currentUserId
                     })
                 });
 
