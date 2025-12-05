@@ -1626,7 +1626,7 @@
     <!-- JAVASCRIPT -->
     <script>
         const API_URL = '/api';
-
+        let tempImages = []
         // --- AUTH ---
         function enterAdmin() { document.getElementById('role-screen').classList.add('hidden'); document.getElementById('admin-login-screen').classList.remove('hidden'); }
         async function submitLogin() {
@@ -1686,16 +1686,16 @@
 
             try {
                 const res = await fetch(`${API_URL}/admin/image-template`);
-                const temps = await res.json();
+                 tempImages = await res.json();
 
-                if (temps.length === 0) {
+                if (tempImages.length === 0) {
                     grid.innerHTML = '<p style="text-align:center; color:gray; width:100%;">Chưa có template nào.</p>';
                     return;
                 }
 
                 // --- ĐÂY LÀ CHỖ GỌI HÀM ---
                 // Duyệt qua mảng templates và gọi renderAdminTemplateCard cho từng phần tử
-                grid.innerHTML = temps.map(t => renderAdminTemplateCard(t)).join('');
+                grid.innerHTML = tempImages.map(t => renderAdminTemplateCard(t)).join('');
 
             } catch (e) {
                 console.error(e);
@@ -1721,7 +1721,7 @@
                 <button class="btn btn-secondary" onclick='deleteTemplate("${t._id}")' style="color:red; font-size:0.8rem;">
                     <i class="fa-solid fa-trash"></i> Xóa
                 </button>
-                <button class="btn btn-secondary" onclick='openEditTemplate(${JSON.stringify(t)})' style="color:var(--primary); font-size:0.8rem;">
+                <button class="btn btn-secondary" onclick='openEditTemplate("${t._id}")' style="color:var(--primary); font-size:0.8rem;">
                     <i class="fa-solid fa-pen"></i> Sửa
                 </button>
             </div>
@@ -1770,20 +1770,21 @@
 
         // Hàm mở Modal Edit
         function openEditTemplate(t) {
-            document.getElementById('tman-id').value = t._id;
-            document.getElementById('tman-name').value = t.templateName;
-            document.getElementById('tman-code').value = t.templateCode;
+            const currentTemplate = tempImages.find(item=> item._id == t)
+            document.getElementById('tman-id').value = currentTemplate._id;
+            document.getElementById('tman-name').value = currentTemplate.templateName;
+            document.getElementById('tman-code').value = currentTemplate.templateCode;
             document.getElementById('tman-code').disabled = true; // Không sửa code
-            document.getElementById('tman-prompt').value = t.basePrompt;
-            document.getElementById('tman-description').value = t?.description || "";
+            document.getElementById('tman-prompt').value = currentTemplate.basePrompt;
+            document.getElementById('tman-description').value = currentTemplate?.description || "";
             const container = document.getElementById('tman-vars-container');
             container.innerHTML = '';
-            if (t.variables && t.variables.length > 0) {
-                t.variables.forEach(v => addVarRow(v.key, v.label));
+            if (currentTemplate.variables && currentTemplate.variables.length > 0) {
+                currentTemplate.variables.forEach(v => addVarRow(v.key, v.label));
             } else {
                 // Fallback cho data cũ (nếu variables là mảng string)
-                if (typeof t.variables[0] === 'string') {
-                    t.variables.forEach(v => addVarRow(v, v));
+                if (typeof currentTemplate.variables[0] === 'string') {
+                    currentTemplate.variables.forEach(v => addVarRow(v, v));
                 }
             }
 
@@ -2015,17 +2016,24 @@
 
         // CUSTOMER IMAGE
         let currentTemplate = null;
-        async function loadCustTemplates() { const res = await fetch(`${API_URL}/admin/image-template`); const temps = await res.json(); document.getElementById('cust-template-list').innerHTML = temps.map(t => `<div class="template-item" onclick='selectTemplate(${JSON.stringify(t)})'><strong>${t.templateName}</strong></div>`).join(''); }
+  
+        async function loadCustTemplates() {
+            const res = await fetch(`${API_URL}/admin/image-template`); tempImages = await res.json(); document.getElementById('cust-template-list').innerHTML = tempImages.map(t => {
+
+
+                return `<div class="template-item" onclick='selectTemplate("${t._id}")'><strong>${t.templateName}</strong></div>`
+            }).join('');
+        }
         // --- CLIENT: RENDER FORM ---
         function selectTemplate(t) {
-            currentTemplate = t;
+            currentTemplate = tempImages.find(item => item._id == t);
             document.getElementById('img-empty-state').classList.add('hidden');
             document.getElementById('img-form-area').classList.remove('hidden');
             document.getElementById('form-template-name').innerText = t.templateName;
 
             // Render Variables Inputs
             const container = document.getElementById('img-input-container');
-            container.innerHTML = t.variables.map(v => `
+            container.innerHTML = currentTemplate.variables.map(v => `
         <div class="form-group">
             <label class="form-label" style="font-size: 0.9rem; color: var(--text-main);">
                 ${v.label} <span style="font-weight:normal; color:#94a3b8; font-size:0.8rem;">(${v.key})</span>

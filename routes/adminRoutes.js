@@ -10,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để x�
 const fileKnowledgeService = require('../services/fileKnowledgeService');
 const geminiService = require('../services/geminiService')
 const GeneratedImage = require('../models/GeneratedImage')
-const imageGeneratorSerivce = require('../services/imageGeneratorService')
+
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================

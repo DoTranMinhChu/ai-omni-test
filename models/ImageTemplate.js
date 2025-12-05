@@ -6,8 +6,8 @@ const templateSchema = new mongoose.Schema({
     basePrompt: { type: String, required: true },
     // CẬP NHẬT: Variables là mảng object
     variables: [{
-        key: { type: String, required: true },   // VD: DISH_NAME (Dùng để thay thế trong prompt)
-        label: { type: String, required: true } // VD: Tên món ăn (Dùng để hiển thị UI)
+        key: { type: String, required: true },   
+        label: { type: String, required: true }
     }],
     description: {type: String},
     createdBy: { type: String, default: 'ADMIN' }
