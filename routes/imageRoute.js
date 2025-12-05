@@ -16,7 +16,7 @@ router.post('/generate', async (req, res) => {
         }
 
         // 2. Validate
-        const missingVars = template.variables.filter(v => !variables[v]);
+        const missingVars = template.variables.filter(v => !variables[v.key]);
         if (missingVars.length > 0) {
             return res.status(400).json({ error: `Thiếu biến: ${missingVars.join(', ')}` });
         }
