@@ -942,7 +942,7 @@
             border: 1px solid var(--border);
         }
 
-        .prompt-box {
+        /* .prompt-box {
             background: #1e293b;
             color: #a5b4fc;
             padding: 15px;
@@ -954,7 +954,7 @@
             font-size: 0.85rem;
             line-height: 1.4;
             word-wrap: break-word;
-        }
+        } */
 
         /* UI cho danh sách biến số động ở Admin */
         .var-row {
@@ -1266,7 +1266,7 @@
                             <div id="img-placeholder-text"></div>
                             <div id="img-loading-spinner" class="loading-spinner hidden absolute"></div>
                         </div>
-                        <div class="prompt-box" id="final-prompt-display">Prompt AI...</div>
+                        <!-- <div class="prompt-box" id="final-prompt-display">Prompt AI...</div> -->
                     </div>
 
                     <div id="img-empty-state" class="text-center text-gray-400"
@@ -1974,7 +1974,7 @@
                 // 4. DISPLAY RESULT
                 if (data.success && data.imageBase64) {
                     // Hiển thị Prompt đã tối ưu
-                    document.getElementById('final-prompt-display').innerText = data.finalOptimizedPrompt;
+                    // document.getElementById('final-prompt-display').innerText = data.finalOptimizedPrompt;
 
                     // --- [FIX QUAN TRỌNG Ở ĐÂY] ---
                     // Tạo chuỗi Base64 chuẩn (Imagen thường trả về PNG)
