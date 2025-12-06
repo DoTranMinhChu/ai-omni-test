@@ -4,19 +4,22 @@ const CustomerSchema = new mongoose.Schema({
     identifier: { type: String, required: true },
     botCode: { type: String, required: true, index: true },
 
-    // 1. Explicit Memory (Cứng - Do Admin định nghĩa)
+    // Thông tin cứng (Tên, Tuổi, SĐT...)
     attributes: {
         type: Map,
         of: mongoose.Schema.Types.Mixed,
         default: {}
     },
 
-    // 2. Implicit Memory (Mềm - Do AI tự tóm tắt)
-    // Đây là "Nhật ký" tóm tắt quá trình trò chuyện
-    contextSummary: {
+    // Hồ sơ tâm lý khách hàng (AI tự xây dựng dần)
+    // VD: "Khách hàng khó tính, thích nói thẳng, ghét icon"
+    psychologicalProfile: {
         type: String,
-        default: ""
+        default: "Người dùng mới, chưa rõ tính cách."
     },
+
+    // Tóm tắt câu chuyện cũ
+    contextSummary: { type: String, default: "" },
 
     lastActiveAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now }

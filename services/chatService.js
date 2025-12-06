@@ -10,175 +10,161 @@ class ChatService {
         const startTime = Date.now();
 
         // 1. Lấy Bot & Customer
-        const [bot, customer] = await Promise.all([
-            Bot.findOne({ code: botCode }).lean(),
-            Customer.findOne({ identifier: userIdentifier, botCode })
-        ]);
-
+        const bot = await Bot.findOne({ code: botCode }).lean();
         if (!bot) throw new Error("Bot not found");
 
-        let currentCustomer = customer;
-        if (!currentCustomer) {
-            currentCustomer = await Customer.create({ identifier: userIdentifier, botCode });
+        let customer = await Customer.findOne({ identifier: userIdentifier, botCode });
+        if (!customer) {
+            customer = await Customer.create({ identifier: userIdentifier, botCode });
         }
 
-        // 2. Lấy Lịch sử ngắn (Short-term) + RAG
-        // Chỉ cần lấy rất ít tin nhắn (ví dụ 4 tin) vì đã có Summary hỗ trợ
-        const [ contextDocs] = await Promise.all([
-
+        // 2. PARALLEL FETCHING: Lấy Lịch sử + RAG cùng lúc để tối ưu tốc độ
+        // Lấy 15 tin nhắn gần nhất để đảm bảo tính liền mạch (Continuity)
+        const [recentMessages, ragChunks] = await Promise.all([
+            Message.find({ botCode, customerIdentifier: userIdentifier })
+                .sort({ createdAt: -1 })
+                .limit(15)
+                .lean(), // .lean() giúp query nhanh hơn
             knowledgeService.retrieveContext(bot._id, userMessageContent)
         ]);
 
+        // Đảo ngược lại message để đúng thứ tự thời gian (Cũ -> Mới) cho Prompt
+        const sortedMessages = recentMessages.reverse();
 
-        // 3. Build Prompt (Nâng cấp)
-        // Truyền thêm contextSummary vào prompt
+        // 3. Xây dựng Prompt "Tiếng Việt hóa"
         const systemPrompt = promptBuilder.build(
             bot,
-            currentCustomer.attributes,
-            contextDocs,
-            currentCustomer.contextSummary // <--- Truyền tóm tắt ngữ cảnh vào
+            customer,
+            sortedMessages,
+            ragChunks
         );
 
         // 4. Gọi AI
+        // Lưu ý: Chỉ gửi systemPrompt và userMessageContent mới nhất.
+        // Lịch sử cũ đã được nhúng vào systemPrompt để AI có cái nhìn toàn cảnh.
         const messagesPayload = [
-            { role: "system", content: systemPrompt.replace(/\s+/g, ' ').trim() },
-
+            { role: "system", content: systemPrompt },
             { role: "user", content: userMessageContent }
         ];
 
-        const aiResponseRaw = await deepseekService.chat(messagesPayload);
+        // Tăng max_tokens lên một chút để bot thoải mái diễn đạt
+        const aiResponseRaw = await deepseekService.chat(messagesPayload, {
+            temperature: bot.behaviorConfig?.creativityLevel || 0.7,
+            max_tokens: 1000
+        });
+
         const { replyText, extractedData } = this.parseResponse(aiResponseRaw);
 
-        // 5. Trả kết quả ngay
+        // 5. Trả kết quả ngay cho người dùng (Non-blocking)
         const responseData = { reply: replyText, captured_data: extractedData };
 
-        // 6. Background Tasks (Nâng cấp: Thêm logic tự tóm tắt)
+        // 6. Xử lý hậu kỳ (Lưu DB, Tóm tắt, Update Profile)
+        // Không dùng await ở đây để api phản hồi nhanh
         this.handleBackgroundTasks(
-            bot, currentCustomer, userIdentifier, userMessageContent, replyText, extractedData
-        ).catch(err => console.error("BG Error:", err));
+            bot, customer, userIdentifier, userMessageContent, replyText, extractedData
+        ).catch(err => console.error("BG Task Error:", err));
 
-        console.log(`🚀 Response Time: ${Date.now() - startTime}ms`);
+        console.log(`🚀 Total Latency: ${Date.now() - startTime}ms`);
         return responseData;
     }
 
-    // ... (optimizeHistory giữ nguyên) ...
-    optimizeHistory(messages) {
-        if (!messages || messages.length === 0) return [];
-
-        // Đảo ngược để có thứ tự thời gian: Cũ -> Mới
-        const chronologicalMsgs = messages.reverse();
-
-        return chronologicalMsgs.map(msg => {
-            let content = msg.content;
-
-            // CHIẾN THUẬT TỐI ƯU:
-            // Nếu là tin nhắn của Assistant (Bot) và không phải tin nhắn cuối cùng,
-            // mà nó lại quá dài (> 200 ký tự), ta sẽ cắt bớt để tiết kiệm token.
-            // AI chỉ cần biết sơ sơ bot đã nói gì, không cần nguyên văn.
-            if (msg.role === 'assistant' && content.length > 300) {
-                content = content.substring(0, 300) + "... [Nội dung đã được rút gọn]";
-            }
-
-            return {
-                role: msg.role,
-                content: content
-            };
-        });
-    }
+    // Tác vụ chạy ngầm thông minh hơn
     async handleBackgroundTasks(bot, customer, userIdentifier, userMsg, botMsg, extractedData) {
         try {
-            const tasks = [];
+            // A. Lưu tin nhắn vào DB
+            await Promise.all([
+                Message.create({ botCode: bot.code, customerIdentifier: userIdentifier, role: 'user', content: userMsg }),
+                Message.create({ botCode: bot.code, customerIdentifier: userIdentifier, role: 'assistant', content: botMsg, metadata: { extractedData } })
+            ]);
 
-            // 1. Lưu tin nhắn
-            tasks.push(Message.create({ botCode: bot.code, customerIdentifier: userIdentifier, role: 'user', content: userMsg }));
-            tasks.push(Message.create({ botCode: bot.code, customerIdentifier: userIdentifier, role: 'assistant', content: botMsg, metadata: { extractedData } }));
-
-            // 2. Cập nhật Explicit Memory (Attributes - Cứng)
-            let attributesChanged = false;
+            // B. Cập nhật Attributes (Thông tin cứng)
+            let needSaveCustomer = false;
             if (extractedData && Object.keys(extractedData).length > 0) {
-                const memoryConfig = bot.memoryConfig || [];
+                // Logic merge attributes...
                 for (const [key, value] of Object.entries(extractedData)) {
-                    if (memoryConfig.some(c => c.key === key)) {
-                        if (customer.attributes instanceof Map) customer.attributes.set(key, value);
-                        else customer.attributes[key] = value;
-                        attributesChanged = true;
-                    }
+                    if (customer.attributes instanceof Map) customer.attributes.set(key, value);
+                    else customer.attributes[key] = value;
+                }
+                needSaveCustomer = true;
+            }
+
+            // C. Cập nhật "Implicit Memory" (Tóm tắt & Hồ sơ tâm lý)
+            // Chiến thuật: Chỉ update sau mỗi 3-5 tin nhắn hoặc khi hội thoại dài
+            // Để tiết kiệm chi phí và thời gian
+            const messageCount = await Message.countDocuments({ botCode: bot.code, customerIdentifier: userIdentifier });
+
+            if (messageCount % 4 === 0) {
+                console.log("🧠 Triggering Memory Consolidation...");
+                const newAnalysis = await this.consolidateMemory(
+                    customer.contextSummary,
+                    customer.psychologicalProfile,
+                    userMsg,
+                    botMsg
+                );
+
+                if (newAnalysis) {
+                    customer.contextSummary = newAnalysis.summary;
+                    customer.psychologicalProfile = newAnalysis.profile;
+                    needSaveCustomer = true;
                 }
             }
 
-            // 3. Cập nhật Implicit Memory (Context Summary - Mềm)
-            // Logic: Gọi AI tóm tắt lại hội thoại để cập nhật contextSummary
-            // Để tiết kiệm, ta có thể random xác suất hoặc đếm số tin nhắn để không gọi liên tục
-            // Ở đây demo gọi luôn để thấy hiệu quả
-            const newSummary = await this.updateContextSummary(
-                customer.contextSummary,
-                userMsg,
-                botMsg
-            );
-
-            if (newSummary) {
-                customer.contextSummary = newSummary;
-                attributesChanged = true; // Đánh dấu để save
-            }
-
-            // 4. Lưu Customer nếu có thay đổi
-            if (attributesChanged) {
-                if (customer.markModified) customer.markModified('attributes');
+            // D. Lưu Customer
+            if (needSaveCustomer) {
                 customer.lastActiveAt = new Date();
-                tasks.push(customer.save());
+                await customer.save();
             } else {
-                // Chỉ update lastActiveAt
                 await Customer.updateOne({ _id: customer._id }, { lastActiveAt: new Date() });
             }
 
-            await Promise.all(tasks);
-
         } catch (error) {
-            console.error("BG Task Error:", error);
+            console.error("Background Task Error:", error);
         }
     }
 
-    /**
-     * Hàm gọi AI để tóm tắt hội thoại và cập nhật trí nhớ ngữ cảnh
-     */
-    async updateContextSummary(oldSummary, userMsg, botMsg) {
+    // Hàm "Tư duy" để cập nhật bộ nhớ dài hạn
+    async consolidateMemory(oldSummary, oldProfile, lastUserMsg, lastBotMsg) {
+        const prompt = `
+        Tôi cần bạn cập nhật hồ sơ khách hàng dựa trên trao đổi mới nhất.
+        
+        DỮ LIỆU CŨ:
+        - Tóm tắt chuyện cũ: "${oldSummary}"
+        - Hồ sơ tâm lý: "${oldProfile}"
+
+        TRAO ĐỔI MỚI NHẤT:
+        Khách: "${lastUserMsg}"
+        Bot: "${lastBotMsg}"
+
+        YÊU CẦU:
+        Trả về JSON update gồm 2 trường:
+        1. "summary": Tóm tắt ngắn gọn diễn biến câu chuyện đến hiện tại (dưới 50 từ).
+        2. "profile": Cập nhật tính cách/thái độ khách hàng (dưới 20 từ).
+
+        Output JSON only.
+        `;
+
         try {
-            const prompt = `
-            Bạn là bộ nhớ của một AI. Nhiệm vụ của bạn là cập nhật bản tóm tắt ngắn gọn về cuộc trò chuyện.
-            
-            TÓM TẮT CŨ: "${oldSummary || 'Chưa có'}"
-            
-            HỘI THOẠI MỚI NHẤT:
-            User: "${userMsg}"
-            Bot: "${botMsg}"
-            
-            YÊU CẦU:
-            - Kết hợp thông tin mới vào tóm tắt cũ.
-            - Giữ lại các ý chính quan trọng (sở thích, vấn đề đang bàn, thái độ khách).
-            - Loại bỏ các chi tiết thừa, chào hỏi xã giao.
-            - Giới hạn dưới 100 từ.
-            - CHỈ TRẢ VỀ NỘI DUNG TÓM TẮT MỚI.
-            `;
-
-            const summary = await deepseekService.chat([
-                { role: "user", content: prompt }
-            ], { temperature: 0.5, max_tokens: 150 }); // Nhiệt độ thấp để ổn định, token ít
-
-            return summary.trim();
+            const result = await deepseekService.chat([{ role: "user", content: prompt }], { temperature: 0.2 });
+            // Cố gắng parse JSON từ result (DeepSeek đôi khi wrap trong markdown)
+            const cleanJson = result.replace(/```json|```/g, '').trim();
+            return JSON.parse(cleanJson);
         } catch (e) {
-            console.error("Summary Update Failed:", e.message);
+            console.error("Memory Consolidation Failed:", e);
             return null;
         }
     }
 
     parseResponse(rawText) {
+        // Giữ nguyên logic parse cũ của bạn, nó đã ổn
         if (!rawText) return { replyText: "", extractedData: {} };
         const separatorStart = "|||DATA_START|||";
         const separatorEnd = "|||DATA_END|||";
         const startIndex = rawText.indexOf(separatorStart);
         if (startIndex === -1) return { replyText: rawText, extractedData: {} };
+
         const replyText = rawText.substring(0, startIndex).trim();
         const jsonString = rawText.substring(startIndex + separatorStart.length, rawText.indexOf(separatorEnd));
+
         try {
             const data = JSON.parse(jsonString);
             return { replyText, extractedData: data };

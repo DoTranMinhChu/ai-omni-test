@@ -32,7 +32,7 @@ const BotSchema = new mongoose.Schema({
         creativityLevel: { type: Number, default: 0.7 }
     },
 
-    // Cấu hình bộ nhớ (AI sẽ tự động điền cái này khi Generate)
+    // Thông tin khách hàng mà bot cần lưu
     memoryConfig: [{
         key: String,
         description: String,

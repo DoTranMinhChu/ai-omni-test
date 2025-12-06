@@ -2,59 +2,43 @@ const deepseekService = require('./deepseekService');
 
 class BotOptimizer {
     async optimizeBotInstruction(rawSystemPrompt, behaviorConfig, memoryConfig) {
-
-        // Chuẩn bị dữ liệu đầu vào
         const memoryKeys = memoryConfig.map(m => m.key).join(', ');
-        const prohibited = behaviorConfig.prohibitedTopics.join(', ');
-        const style = `${behaviorConfig.tone}, ${behaviorConfig.attitude}`;
 
-        // Prompt này KHÔNG chứa ví dụ cụ thể về 3M hay bất cứ ngành nào
-        // Nó chỉ chứa hướng dẫn về CẤU TRÚC (Structure Instructions)
+        // Meta-Prompt hoàn toàn bằng Tiếng Việt để DeepSeek hiểu sắc thái
         const prompt = `
-        Bạn là chuyên gia tối ưu hóa System Prompt (Meta-Prompt Engineer).
-        
-        NHIỆM VỤ:
-        Biên tập lại "DỮ LIỆU ĐẦU VÀO" bên dưới thành một bản hướng dẫn (System Instruction) ngắn gọn, súc tích, logic để nạp cho AI.
+        Bạn là một chuyên gia thiết kế nhân cách cho AI (Persona Designer).
+        Nhiệm vụ: Biến "Mô tả thô" thành một "Bản thiết lập nhân vật" (System Instruction) chi tiết, tự nhiên và tối ưu cho LLM.
 
-        DỮ LIỆU ĐẦU VÀO TỪ NGƯỜI DÙNG:
-        - Mô tả gốc (Raw Prompt): "${rawSystemPrompt}"
-        - Phong cách (Style): "${style}"
-        - Tuyệt đối cấm (Taboos): "${prohibited}"
-        - Dữ liệu cần trích xuất (Memory): "${memoryKeys}"
+        THÔNG TIN ĐẦU VÀO:
+        - Mô tả gốc: "${rawSystemPrompt}"
+        - Giọng điệu (Tone): "${behaviorConfig.tone}"
+        - Thái độ (Attitude): "${behaviorConfig.attitude}"
+        - Cấm kỵ: "${behaviorConfig.prohibitedTopics.join(', ')}"
+        - Dữ liệu cần nhớ: "${memoryKeys}"
 
-        YÊU CẦU TỐI ƯU HÓA (QUAN TRỌNG):
-        1. **Trung thành tuyệt đối:** Chỉ sử dụng thông tin từ "Mô tả gốc". KHÔNG được tự ý thêm các kịch bản bán hàng, tên thương hiệu, hay quy trình không có trong đầu vào.
-        2. **Cấu trúc hóa:** Tách đoạn văn dài thành các gạch đầu dòng logic (Role, Goal, Rules, Workflow).
-        3. **Văn phong:** Sử dụng câu mệnh lệnh ngắn gọn (Imperative mood). Loại bỏ các từ nối rườm rà như "Bạn hãy...", "Xin vui lòng...".
-        4. **Ngôn ngữ:** Output là Tiếng Anh (để AI xử lý nhanh nhất) hoặc Tiếng Việt nhưng phải cực ngắn.
+        YÊU CẦU ĐẦU RA (OUTPUT):
+        Hãy viết một đoạn System Prompt bằng TIẾNG VIỆT, sử dụng ngôi thứ 2 ("Bạn là..."), bao gồm các phần sau:
+        1. **ĐỊNH DANH & CỐT LÕI**: Bạn là ai? Sứ mệnh là gì? (Viết thật "deep", có hồn).
+        2. **PHONG CÁCH GIAO TIẾP**: Hướng dẫn cụ thể cách dùng từ, cách xưng hô, emoji (nếu có), độ dài câu. Phải phản ánh đúng Tone & Attitude ở trên.
+        3. **QUY TẮC ỨNG XỬ**: Những điều CẤM và những điều KHUYẾN KHÍCH.
+        4. **NHIỆM VỤ TRÍ NHỚ**: Hướng dẫn khéo léo trích xuất thông tin: ${memoryKeys} nhưng không được hỏi dồn dập như công an.
 
-        TEMPLATE OUTPUT BẮT BUỘC (Hãy điền nội dung tương ứng vào):
-        ROLE: [Xác định vai trò chính từ mô tả]
-        GOAL: [Mục tiêu cốt lõi]
-        PERSONALITY: [Phong cách & Thái độ]
-        CONSTRAINTS: [Các điều cấm]
-        
-        KEY GUIDELINES:
-        - [Quy tắc 1 rút ra từ mô tả]
-        - [Quy tắc 2 rút ra từ mô tả]
-        - [Quy tắc 3...]
-        
-        MEMORY TARGETS: ${memoryKeys}
-
-        HÃY VIẾT LẠI DỰA TRÊN DỮ LIỆU ĐẦU VÀO TRÊN:
+        LƯU Ý: 
+        - Viết dưới dạng văn xuôi mạch lạc hoặc gạch đầu dòng rõ ràng.
+        - Tối ưu hóa để AI "nhập vai" sâu sắc, không bị máy móc.
+        - KHÔNG giải thích gì thêm, chỉ đưa ra kết quả Prompt đã tối ưu.
         `;
 
         try {
             const optimizedText = await deepseekService.chat([
-                { role: 'system', content: 'You are a neutral Prompt Editor. Do not hallucinate info not present in input.' },
+                { role: 'system', content: 'Bạn là chuyên gia thiết kế Prompt Tiếng Việt.' },
                 { role: 'user', content: prompt }
-            ], { temperature: 0.3, max_tokens: 2000 }); // Temp thấp để bám sát input
+            ], { temperature: 0.7, max_tokens: 2000 });
 
             return optimizedText.trim();
         } catch (error) {
             console.error("Optimization Failed:", error);
-            // Fallback an toàn: Trả về nguyên gốc nếu lỗi, không chế bậy
-            return rawSystemPrompt;
+            return rawSystemPrompt; // Fallback
         }
     }
 }

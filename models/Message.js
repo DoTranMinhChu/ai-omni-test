@@ -6,7 +6,7 @@ const MessageSchema = new mongoose.Schema({
     
     role: { 
         type: String, 
-        enum: ['user', 'assistant', 'system'], 
+        enum: ['user', 'assistant', 'system'], // user là tin nhắn của người dùng , assistant là tin nhắn của bot, system là tin nhắn của hệ thống
         required: true 
     },
     

@@ -1,47 +1,63 @@
 class PromptBuilder {
-    build(bot, customerAttributes, retrievedChunks, contextSummary) {
+    build(bot, customer, recentMessages, retrievedChunks) {
+        // 1. Dữ liệu khách hàng
+        const userAttrs = customer.attributes instanceof Map
+            ? Object.fromEntries(customer.attributes)
+            : customer.attributes;
+        const userJson = JSON.stringify(userAttrs, null, 2);
 
-        // 1. Xử lý Attributes (Chuyển thành dạng key:value đơn giản nhất)
-        let userFactStr = "New User";
-        if (customerAttributes && Object.keys(customerAttributes).length > 0) {
-            const attrs = customerAttributes instanceof Map ? Object.fromEntries(customerAttributes) : customerAttributes;
-            userFactStr = Object.entries(attrs).map(([k, v]) => `${k}:${v}`).join('|');
-        }
-
-        // 2. Xử lý RAG (Chỉ lấy nội dung tinh túy nhất)
-        let ragContext = "";
+        // 2. Kiến thức (RAG) - Lọc kỹ hơn
+        let knowledgeSection = "Không có tài liệu tham khảo.";
         if (Array.isArray(retrievedChunks) && retrievedChunks.length > 0) {
-            // Chỉ lấy 2 chunks tốt nhất và cắt ngắn để tiết kiệm token
-            ragContext = retrievedChunks.slice(0, 2).map(c => c.content.substring(0, 500)).join('\n---\n');
+            knowledgeSection = retrievedChunks
+                .map(c => `- ${c.content}`)
+                .join('\n');
         }
 
-        // 3. Lấy Core Instruction (Đã tối ưu ở bước 1)
-        const coreInstruction = bot.optimizedPrompt || bot.systemPrompt;
+        // 3. Lịch sử chat (Recent Messages) - QUAN TRỌNG NHẤT
+        // Convert array message thành đoạn hội thoại dạng kịch bản
+        const historyText = recentMessages.map(msg => {
+            const role = msg.role === 'user' ? 'Khách' : 'Bạn';
+            return `${role}: ${msg.content}`;
+        }).join('\n');
 
-        // 4. Danh sách cần trích xuất
-        const extractFields = bot.memoryConfig ? bot.memoryConfig.map(f => f.key).join(',') : "";
+        // 4. Memory Targets
+        const memoryKeys = bot.memoryConfig ? bot.memoryConfig.map(m => m.key).join(', ') : "";
 
-        // --- FINAL PROMPT (Cấu trúc dồn nén) ---
+        // --- FINAL SYSTEM PROMPT (Tiếng Việt thuần khiết) ---
         return `
-=== SYSTEM ===
-${coreInstruction}
+${bot.optimizedPrompt || bot.systemPrompt}
 
-=== KNOWLEDGE ===
-${ragContext}
+### DỮ LIỆU BỐI CẢNH (CONTEXT DATA)
+Hãy sử dụng các dữ liệu dưới đây để tư duy, nhưng ĐỪNG nhắc lại chúng một cách máy móc trừ khi cần thiết.
 
-=== USER CONTEXT ===
-Facts: ${userFactStr}
-Summary: ${contextSummary || "None"}
+<Hồ_Sơ_Khách_Hàng>
+${userJson}
+* Phân tích tâm lý hiện tại: ${customer.psychologicalProfile || "Chưa rõ"}
+* Tóm tắt chuyện cũ: ${customer.contextSummary || "Mới bắt đầu"}
+</Hồ_Sơ_Khách_Hàng>
 
-=== STRICT RESPONSE RULES ===
-1. **SPEAK VIETNAMESE ONLY.**
-2. **BE CONCISE:** Keep response under 3 sentences. Like a chat message, not an email.
-3. **NO FORMATTING:** Do not use bold, italics, lists, or markdown.
-4. **ACTION:** Answer the user -> Ask a follow-up question (if needed) -> Extract Data.
+<Kiến_Thức_Tra_Cứu>
+${knowledgeSection}
+</Kiến_Thức_Tra_Cứu>
 
-=== DATA EXTRACTION ===
-Target fields: [${extractFields}]
-Format: End reply with |||DATA_START|||{"key":"value"}|||DATA_END||| if info found.
+<Lịch_Sử_Hội_Thoại_Gần_Nhất>
+${historyText}
+</Lịch_Sử_Hội_Thoại_Gần_Nhất>
+
+### HƯỚNG DẪN TƯ DUY (CHAIN OF THOUGHT)
+Trước khi trả lời, hãy thực hiện quy trình tư duy ngầm:
+1. **Quan sát**: Khách đang hỏi gì? Cảm xúc của họ thế nào qua tin nhắn cuối?
+2. **Đối chiếu**: Thông tin này có trong <Kiến_Thức_Tra_Cứu> hay <Lịch_Sử_Hội_Thoại> không?
+3. **Quyết định**: Mình nên trả lời ngắn gọn, hài hước, hay nghiêm túc? Có cần hỏi lại để lấy thông tin [${memoryKeys}] không?
+
+### ĐỊNH DẠNG TRẢ LỜI
+- Trả lời tự nhiên như người thật chat qua tin nhắn.
+- KHÔNG dùng các cụm từ: "Dựa trên thông tin...", "Theo tài liệu...".
+- Nếu phát hiện thông tin mới của khách hàng (${memoryKeys}), hãy trích xuất ở cuối tin nhắn theo định dạng chuẩn bên dưới (người dùng sẽ không thấy phần này).
+
+Định dạng trích xuất (nếu có):
+|||DATA_START|||{"key": "value"}|||DATA_END|||
 `;
     }
 }
