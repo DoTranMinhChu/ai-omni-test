@@ -1,41 +1,64 @@
 class PromptBuilder {
-    build(bot, customerAttributes, retrievedDocs) {
-        // 1. Attribute Context
-        const currentMemory = JSON.stringify(Object.fromEntries(customerAttributes));
+    build(bot, customerAttributes, retrievedDocs, contextSummary) {
 
-        // 2. Memory Extraction Rules
-        const fieldsToExtract = bot.memoryConfig.map(f => `- ${f.key}: ${f.description}`).join('\n');
 
-        // 3. Prohibited Rules
+        const memoryObj = customerAttributes instanceof Map
+            ? Object.fromEntries(customerAttributes)
+            : customerAttributes;
+
+        const currentMemory = JSON.stringify(memoryObj);
+
+
+        // 2. Extraction Rules
+        const fieldsToExtract = bot.memoryConfig
+            .map(f => `${f.key} (${f.description})`)
+            .join(', ');
+
+        // 3. RAG (Cắt ngắn để tối ưu tốc độ)
+        let cleanDocs = retrievedDocs || "";
+        // if (cleanDocs.length > 6000) {
+        //     cleanDocs = cleanDocs.substring(0, 6000) + "...[truncated]";
+        // }
+        if (!cleanDocs) cleanDocs = "No specific knowledge found.";
+
+        // 4. Taboos
         const taboos = bot.behaviorConfig.prohibitedTopics.length > 0
-            ? `CẤM KỴ TUYỆT ĐỐI (KHÔNG ĐƯỢC NHẮC ĐẾN): ${bot.behaviorConfig.prohibitedTopics.join(', ')}`
+            ? `DO NOT MENTION: ${bot.behaviorConfig.prohibitedTopics.join(', ')}`
+            : "";
+        const summarySection = contextSummary
+            ? `\n=== SUMMARY OF CONTEXT CONTINUOUS CONVERSATION ===\n${contextSummary}\n(Please continue this conversation.)`
             : "";
 
+        // --- PROMPT TỐI ƯU (Chỉ thị Anh - Trả lời Việt) ---
         return `
-        === VAI TRÒ & TÍNH CÁCH ===
-        ${bot.systemPrompt}
-        
-        - GIỌNG ĐIỆU (TONE): ${bot.behaviorConfig.tone}
-        - THÁI ĐỘ (ATTITUDE): ${bot.behaviorConfig.attitude}
-        - PHONG CÁCH TRẢ LỜI: ${bot.behaviorConfig.responseStyle}
-        
-        ${taboos}
+ROLE & PERSONA (Vietnamese):
+"${bot.systemPrompt}"
 
-        === KIẾN THỨC NỀN TẢNG (CHỈ DÙNG THÔNG TIN NÀY ĐỂ TRẢ LỜI) ===
-        ${retrievedDocs || "Không có tài liệu cụ thể, hãy trả lời dựa trên kiến thức chung nhưng cẩn trọng."}
+CONFIGURATION:
+- Tone: ${bot.behaviorConfig.tone}
+- Attitude: ${bot.behaviorConfig.attitude}
+- Style: ${bot.behaviorConfig.responseStyle}
+${taboos}
 
-        === HỒ SƠ KHÁCH HÀNG HIỆN TẠI ===
-        ${currentMemory}
+KNOWLEDGE BASE (Context):
+"""
+${cleanDocs}
+"""
 
-        === NHIỆM VỤ THU THẬP THÔNG TIN (ẨN) ===
-        Nếu khách hàng cung cấp thông tin dưới đây, hãy trích xuất nó:
-        ${fieldsToExtract}
+USER INFO (FACTS):
+${currentMemory}
+${summarySection}
+INSTRUCTIONS:
+1. Analyze the user's input and the KNOWLEDGE BASE.
+2. **IMPORTANT: REPLY ENTIRELY IN VIETNAMESE (TIẾNG VIỆT).**
+3. Keep the answer natural, relevant, and concise (under 150 words if possible).
+4. Extract information if user mentions: ${fieldsToExtract}.
 
-        === ĐỊNH DẠNG TRẢ LỜI ===
-        1. Trả lời đúng giọng điệu đã yêu cầu, không được bỏ trống câu trả lời.
-        2. Nếu thu thập được thông tin mới, thêm vào cuối câu trả lời theo định dạng:
-           |||DATA_START||| { "key": "value" } |||DATA_END|||
-        `;
+OUTPUT FORMAT:
+[Your Vietnamese Reply Here]
+|||DATA_START||| JSON_DATA |||DATA_END|||
+(Append DATA part ONLY if new info is extracted)
+`;
     }
 }
 
