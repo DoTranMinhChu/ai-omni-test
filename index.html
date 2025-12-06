@@ -1657,7 +1657,19 @@
         async function loadAdminBots() {
             const grid = document.getElementById('bot-grid'); grid.innerHTML = 'Loading...';
             const res = await fetch(`${API_URL}/admin/bots`); bots = await res.json();
-            grid.innerHTML = bots.map(b => `<div class="card"><div class="card-header"><span>${b.name}</span><span class="badge">${b.code}</span></div><div class="card-desc">${b.systemPrompt}</div><div class="card-actions"><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal("${b._id}")'>Data</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal("${b._id}")'>Users</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal("${b._id}")'>Edit</button></div></div>`).join('');
+            grid.innerHTML = bots.map(b => `
+            <div class="card">
+                <div class="card-header">
+                <span>${b.name}</span>
+                <span class="badge">${b.code}</span>
+                </div><div class="card-desc">${b.systemPrompt}</div>
+                <div class="card-actions">
+                    <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal("${b._id}")'>Data</button>
+                    <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal("${b._id}")'>Users</button>
+                    <button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal("${b._id}")'>Edit</button>
+                    <button class="btn btn-danger" style="font-size:0.8rem" onclick='deleteBot("${b._id}")'>Xóa</button>
+                </div>
+                </div>`).join('');
         }
 
         let isEditMode = false;
@@ -1665,6 +1677,13 @@
         function openEditBotModal(botId) {
             const bot = bots.find(bot => bot._id == botId)
             isEditMode = true; document.getElementById('bot-modal-title').innerText = "Sửa Bot"; document.getElementById('create-mode-tabs').classList.add('hidden'); switchCreateTab('manual'); document.getElementById('bot-id').value = bot._id; document.getElementById('manual-name').value = bot.name; document.getElementById('manual-code').value = bot.code; document.getElementById('manual-prompt').value = bot.systemPrompt; document.getElementById('manual-tone').value = bot.behaviorConfig?.tone || ''; document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || ''; document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || ''; document.getElementById('memory-container').innerHTML = ''; if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type)); document.getElementById('bot-modal').classList.remove('hidden');
+        }
+        function deleteBot(botId) {
+            const bot = bots.find(bot => bot._id == botId)
+
+            fetch(`${API_URL}/admin/bots/${bot._id}`, { method: 'DELETE' }).then(res => {
+                loadAdminBots();
+            })
         }
         function switchCreateTab(mode) { document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${mode}`).classList.add('active'); document.getElementById('form-manual').classList.toggle('hidden', mode === 'auto'); document.getElementById('form-auto').classList.toggle('hidden', mode === 'manual'); }
         function addMemoryRow(k = '', d = '', t = 'string') { document.getElementById('memory-container').insertAdjacentHTML('beforeend', `<div class="memory-row"><input class="form-input mem-key" placeholder="Key" value="${k}"><input class="form-input mem-desc" placeholder="Mô tả" value="${d}"><select class="form-input mem-type" style="width:100px;flex:none;"><option value="string" ${t === 'string' ? 'selected' : ''}>Text</option></select><button class="btn-icon" onclick="this.parentElement.remove()" style="color:red"><i class="fa-solid fa-trash"></i></button></div>`); }

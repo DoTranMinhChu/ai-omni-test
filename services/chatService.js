@@ -137,8 +137,8 @@ class ChatService {
 
         YÊU CẦU:
         Trả về JSON update gồm 2 trường:
-        1. "summary": Tóm tắt ngắn gọn diễn biến câu chuyện đến hiện tại (dưới 50 từ).
-        2. "profile": Cập nhật tính cách/thái độ khách hàng (dưới 20 từ).
+        1. "summary": Tóm tắt ngắn gọn diễn biến câu chuyện đến hiện tại (dưới 100 từ).
+        2. "profile": Cập nhật tính cách/thái độ khách hàng (dưới ̀50 từ).
 
         Output JSON only.
         `;

@@ -130,6 +130,19 @@ router.put('/bots/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+router.delete('/bots/:id', async (req, res) => {
+    try {
+
+        const botExisted = await Bot.findById(req.params.id)
+        const deleteBot = await Bot.deleteOne({ _id: req.params.id });
+        await KnowledgeChunk.deleteMany({ botId: req.params.id })
+        await Customer.deleteMany({ botCode: botExisted.code });
+        if (!deleteBot) return res.status(404).json({ error: "Bot không tồn tại" });
+        res.json(deleteBot);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // ==========================================
 // 2. QUẢN LÝ TRI THỨC (KNOWLEDGE BASE)
