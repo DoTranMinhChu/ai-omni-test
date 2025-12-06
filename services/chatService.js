@@ -2,7 +2,7 @@ const Bot = require('../models/Bot');
 const Customer = require('../models/Customer');
 const Message = require('../models/Message');
 const deepseekService = require('./deepseekService');
-const knowledgeService = require('./knowledgeService');
+const knowledgeRAGService = require('./knowledgeRAGService');
 const promptBuilder = require('./promptBuilder');
 
 class ChatService {
@@ -25,9 +25,9 @@ class ChatService {
                 .sort({ createdAt: -1 })
                 .limit(15)
                 .lean(), // .lean() giúp query nhanh hơn
-            knowledgeService.retrieveContext(bot._id, userMessageContent)
+            knowledgeRAGService.retrieveContext(bot._id, userMessageContent)
         ]);
-
+        console.log("ragChunks ==> ",ragChunks)
         // Đảo ngược lại message để đúng thứ tự thời gian (Cũ -> Mới) cho Prompt
         const sortedMessages = recentMessages.reverse();
 

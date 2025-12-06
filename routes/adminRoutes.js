@@ -11,6 +11,7 @@ const fileKnowledgeService = require('../services/fileKnowledgeService');
 const geminiService = require('../services/geminiService')
 const GeneratedImage = require('../models/GeneratedImage')
 const botOptimizer = require('../services/botOptimizer')
+const knowledgeRAGService = require('../services/knowledgeRAGService')
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -161,11 +162,16 @@ router.post('/bots/:botCode/knowledge', async (req, res) => {
         if (!bot) return res.status(404).json({ error: "Bot không tồn tại" });
 
         // 2. Tạo Knowledge Chunk
+        const embedding = await knowledgeRAGService.createEmbedding(chunk.content);
         const chunk = await KnowledgeChunk.create({
             botId: bot._id,
             content: content,
-            keywords: keywords || [] // Nếu không có keywords thì để mảng rỗng
+            keywords: keywords || [],// Nếu không có keywords thì để mảng rỗng
+            embedding: embedding,
+            embeddingModel: 'Xenova/all-MiniLM-L6-v2'
         });
+
+
 
         res.status(201).json({
             message: "Đã nạp tri thức thành công",

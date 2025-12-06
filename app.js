@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const adminRoutes = require('./routes/adminRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const imageRoutes = require('./routes/imageRoute');
+const knowledgeRAGService = require('./services/knowledgeRAGService');
 const path = require("path");
 
 const app = express();
