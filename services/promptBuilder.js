@@ -1,63 +1,47 @@
 class PromptBuilder {
-    build(bot, customerAttributes, retrievedDocs, contextSummary) {
+    build(bot, customerAttributes, retrievedChunks, contextSummary) {
 
+        // 1. Xử lý Attributes (Chuyển thành dạng key:value đơn giản nhất)
+        let userFactStr = "New User";
+        if (customerAttributes && Object.keys(customerAttributes).length > 0) {
+            const attrs = customerAttributes instanceof Map ? Object.fromEntries(customerAttributes) : customerAttributes;
+            userFactStr = Object.entries(attrs).map(([k, v]) => `${k}:${v}`).join('|');
+        }
 
-        const memoryObj = customerAttributes instanceof Map
-            ? Object.fromEntries(customerAttributes)
-            : customerAttributes;
+        // 2. Xử lý RAG (Chỉ lấy nội dung tinh túy nhất)
+        let ragContext = "";
+        if (Array.isArray(retrievedChunks) && retrievedChunks.length > 0) {
+            // Chỉ lấy 2 chunks tốt nhất và cắt ngắn để tiết kiệm token
+            ragContext = retrievedChunks.slice(0, 2).map(c => c.content.substring(0, 500)).join('\n---\n');
+        }
 
-        const currentMemory = JSON.stringify(memoryObj);
+        // 3. Lấy Core Instruction (Đã tối ưu ở bước 1)
+        const coreInstruction = bot.optimizedPrompt || bot.systemPrompt;
 
+        // 4. Danh sách cần trích xuất
+        const extractFields = bot.memoryConfig ? bot.memoryConfig.map(f => f.key).join(',') : "";
 
-        // 2. Extraction Rules
-        const fieldsToExtract = bot.memoryConfig
-            .map(f => `${f.key} (${f.description})`)
-            .join(', ');
-
-        // 3. RAG (Cắt ngắn để tối ưu tốc độ)
-        let cleanDocs = retrievedDocs || "";
-        // if (cleanDocs.length > 6000) {
-        //     cleanDocs = cleanDocs.substring(0, 6000) + "...[truncated]";
-        // }
-        if (!cleanDocs) cleanDocs = "No specific knowledge found.";
-
-        // 4. Taboos
-        const taboos = bot.behaviorConfig.prohibitedTopics.length > 0
-            ? `DO NOT MENTION: ${bot.behaviorConfig.prohibitedTopics.join(', ')}`
-            : "";
-        const summarySection = contextSummary
-            ? `\n=== SUMMARY OF CONTEXT CONTINUOUS CONVERSATION ===\n${contextSummary}\n(Please continue this conversation.)`
-            : "";
-
-        // --- PROMPT TỐI ƯU (Chỉ thị Anh - Trả lời Việt) ---
+        // --- FINAL PROMPT (Cấu trúc dồn nén) ---
         return `
-ROLE & PERSONA (Vietnamese):
-"${bot.systemPrompt}"
+=== SYSTEM ===
+${coreInstruction}
 
-CONFIGURATION:
-- Tone: ${bot.behaviorConfig.tone}
-- Attitude: ${bot.behaviorConfig.attitude}
-- Style: ${bot.behaviorConfig.responseStyle}
-${taboos}
+=== KNOWLEDGE ===
+${ragContext}
 
-KNOWLEDGE BASE (Context):
-"""
-${cleanDocs}
-"""
+=== USER CONTEXT ===
+Facts: ${userFactStr}
+Summary: ${contextSummary || "None"}
 
-USER INFO (FACTS):
-${currentMemory}
-${summarySection}
-INSTRUCTIONS:
-1. Analyze the user's input and the KNOWLEDGE BASE.
-2. **IMPORTANT: REPLY ENTIRELY IN VIETNAMESE (TIẾNG VIỆT).**
-3. Keep the answer natural, relevant, and concise (under 150 words if possible).
-4. Extract information if user mentions: ${fieldsToExtract}.
+=== STRICT RESPONSE RULES ===
+1. **SPEAK VIETNAMESE ONLY.**
+2. **BE CONCISE:** Keep response under 3 sentences. Like a chat message, not an email.
+3. **NO FORMATTING:** Do not use bold, italics, lists, or markdown.
+4. **ACTION:** Answer the user -> Ask a follow-up question (if needed) -> Extract Data.
 
-OUTPUT FORMAT:
-[Your Vietnamese Reply Here]
-|||DATA_START||| JSON_DATA |||DATA_END|||
-(Append DATA part ONLY if new info is extracted)
+=== DATA EXTRACTION ===
+Target fields: [${extractFields}]
+Format: End reply with |||DATA_START|||{"key":"value"}|||DATA_END||| if info found.
 `;
     }
 }

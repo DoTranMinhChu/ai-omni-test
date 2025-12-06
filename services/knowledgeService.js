@@ -2,28 +2,33 @@ const KnowledgeChunk = require('../models/KnowledgeChunk');
 
 class KnowledgeService {
     /**
-     * Tìm kiến thức liên quan dựa trên query người dùng
-     * Sử dụng MongoDB Text Search (Hiệu quả & Tiết kiệm hơn Regex thường)
+     * Trả về danh sách các chunk tốt nhất, sắp xếp theo độ liên quan
      */
     async retrieveContext(botId, query) {
         try {
+            // Tìm kiếm Full-text search của MongoDB
             const chunks = await KnowledgeChunk.find(
-                { 
+                {
                     botId: botId,
-                    $text: { $search: query } 
+                    $text: { $search: query }
                 },
-                { score: { $meta: "textScore" } }
+                { score: { $meta: "textScore" } } // Lấy điểm số phù hợp
             )
-            .sort({ score: { $meta: "textScore" } })
-            .limit(3) // Chỉ lấy 3 đoạn liên quan nhất để tiết kiệm Token
-            .select('content');
+                .sort({ score: { $meta: "textScore" } }) // Sắp xếp: Điểm cao nhất lên đầu
+                .limit(5) // Lấy tối đa 5 đoạn tốt nhất (để lọc sau)
+                .select('content keywords');
 
-            if (!chunks || chunks.length === 0) return "";
-            
-            return chunks.map(c => c.content).join("\n---\n");
+            if (!chunks || chunks.length === 0) return [];
+
+            // Trả về mảng object, KHÔNG join thành string tại đây
+            return chunks.map(c => ({
+                content: c.content,
+                keywords: c.keywords
+            }));
+
         } catch (error) {
             console.error("RAG Retrieval Error:", error);
-            return "";
+            return [];
         }
     }
 }

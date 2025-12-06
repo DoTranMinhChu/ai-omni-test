@@ -7,7 +7,7 @@ const BotSchema = new mongoose.Schema({
 
     // Prompt gốc (Vẫn giữ để định hình cốt lõi)
     systemPrompt: { type: String, required: true },
-
+    optimizedPrompt: { type: String },
     // CẤU HÌNH HÀNH VI CHI TIẾT
     behaviorConfig: {
         tone: {

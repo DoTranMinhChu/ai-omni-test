@@ -24,15 +24,11 @@ class ChatService {
 
         // 2. Lấy Lịch sử ngắn (Short-term) + RAG
         // Chỉ cần lấy rất ít tin nhắn (ví dụ 4 tin) vì đã có Summary hỗ trợ
-        const [recentMessages, contextDocs] = await Promise.all([
-            Message.find({ botCode, customerIdentifier: userIdentifier })
-                .sort({ createdAt: -1 })
-                .limit(4) // Giảm xuống còn 4 vì đã có contextSummary
-                .lean(),
+        const [ contextDocs] = await Promise.all([
+
             knowledgeService.retrieveContext(bot._id, userMessageContent)
         ]);
 
-        const historyForAI = this.optimizeHistory(recentMessages);
 
         // 3. Build Prompt (Nâng cấp)
         // Truyền thêm contextSummary vào prompt
@@ -45,8 +41,8 @@ class ChatService {
 
         // 4. Gọi AI
         const messagesPayload = [
-            { role: "system", content: systemPrompt },
-            ...historyForAI,
+            { role: "system", content: systemPrompt.replace(/\s+/g, ' ').trim() },
+
             { role: "user", content: userMessageContent }
         ];
 

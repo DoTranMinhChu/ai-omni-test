@@ -10,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() }); // Lưu RAM để x�
 const fileKnowledgeService = require('../services/fileKnowledgeService');
 const geminiService = require('../services/geminiService')
 const GeneratedImage = require('../models/GeneratedImage')
-
+const botOptimizer = require('../services/botOptimizer')
 // ==========================================
 // 1. QUẢN LÝ BOT (CRUD & GENERATE)
 // ==========================================
@@ -40,8 +40,19 @@ router.post('/bots', async (req, res) => {
         if (existingBot) {
             return res.status(400).json({ error: "Mã Bot đã tồn tại!" });
         }
+        console.log("⚡ Đang tối ưu hóa System Prompt...");
+        const optimizedPrompt = await botOptimizer.optimizeBotInstruction(
+            systemPrompt,
+            behaviorConfig,
+            memoryConfig
+        );
 
-        const newBot = await Bot.create(req.body);
+        const newBot = await Bot.create({
+            name, code, systemPrompt, behaviorConfig, memoryConfig,
+            optimizedPrompt // <--- Lưu bản đã tối ưu vào DB
+        });
+
+
         res.status(201).json({
             message: "Tạo bot thủ công thành công",
             bot: newBot
@@ -98,18 +109,20 @@ router.put('/bots/:id', async (req, res) => {
     try {
         const { name, systemPrompt, behaviorConfig, memoryConfig } = req.body;
 
-        const updatedBot = await Bot.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: {
-                    name,
-                    systemPrompt,
-                    behaviorConfig,
-                    memoryConfig
-                }
-            },
-            { new: true } // Trả về data mới sau khi update
-        );
+        let updateData = req.body;
+
+        if (systemPrompt || behaviorConfig || memoryConfig) {
+            // Lấy data cũ nếu body thiếu để tối ưu cho chuẩn (nếu cần thiết), 
+            // ở đây giả sử FE gửi full data lên
+            const optimizedPrompt = await botOptimizer.optimizeBotInstruction(
+                systemPrompt,
+                behaviorConfig,
+                memoryConfig
+            );
+            updateData.optimizedPrompt = optimizedPrompt;
+        }
+
+        const updatedBot = await Bot.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
         if (!updatedBot) return res.status(404).json({ error: "Bot không tồn tại" });
         res.json(updatedBot);

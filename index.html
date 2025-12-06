@@ -1626,6 +1626,7 @@
     <!-- JAVASCRIPT -->
     <script>
         const API_URL = '/api';
+        let bots = []
         let tempImages = []
         // --- AUTH ---
         function enterAdmin() { document.getElementById('role-screen').classList.add('hidden'); document.getElementById('admin-login-screen').classList.remove('hidden'); }
@@ -1655,13 +1656,16 @@
         // --- ADMIN: BOT ---
         async function loadAdminBots() {
             const grid = document.getElementById('bot-grid'); grid.innerHTML = 'Loading...';
-            const res = await fetch(`${API_URL}/admin/bots`); const bots = await res.json();
-            grid.innerHTML = bots.map(b => `<div class="card"><div class="card-header"><span>${b.name}</span><span class="badge">${b.code}</span></div><div class="card-desc">${b.systemPrompt}</div><div class="card-actions"><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal(${JSON.stringify(b)})'>Data</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal(${JSON.stringify(b)})'>Users</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal(${JSON.stringify(b)})'>Edit</button></div></div>`).join('');
+            const res = await fetch(`${API_URL}/admin/bots`); bots = await res.json();
+            grid.innerHTML = bots.map(b => `<div class="card"><div class="card-header"><span>${b.name}</span><span class="badge">${b.code}</span></div><div class="card-desc">${b.systemPrompt}</div><div class="card-actions"><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openKnowledgeModal("${b._id}")'>Data</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openCustomerModal("${b._id}")'>Users</button><button class="btn btn-secondary" style="font-size:0.8rem" onclick='openEditBotModal("${b._id}")'>Edit</button></div></div>`).join('');
         }
 
         let isEditMode = false;
         function openCreateBotModal() { isEditMode = false; document.getElementById('bot-modal-title').innerText = "Tạo Bot"; document.getElementById('create-mode-tabs').classList.remove('hidden'); switchCreateTab('manual'); clearBotForm(); document.getElementById('bot-modal').classList.remove('hidden'); }
-        function openEditBotModal(bot) { isEditMode = true; document.getElementById('bot-modal-title').innerText = "Sửa Bot"; document.getElementById('create-mode-tabs').classList.add('hidden'); switchCreateTab('manual'); document.getElementById('bot-id').value = bot._id; document.getElementById('manual-name').value = bot.name; document.getElementById('manual-code').value = bot.code; document.getElementById('manual-prompt').value = bot.systemPrompt; document.getElementById('manual-tone').value = bot.behaviorConfig?.tone || ''; document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || ''; document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || ''; document.getElementById('memory-container').innerHTML = ''; if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type)); document.getElementById('bot-modal').classList.remove('hidden'); }
+        function openEditBotModal(botId) {
+            const bot = bots.find(bot => bot._id == botId)
+            isEditMode = true; document.getElementById('bot-modal-title').innerText = "Sửa Bot"; document.getElementById('create-mode-tabs').classList.add('hidden'); switchCreateTab('manual'); document.getElementById('bot-id').value = bot._id; document.getElementById('manual-name').value = bot.name; document.getElementById('manual-code').value = bot.code; document.getElementById('manual-prompt').value = bot.systemPrompt; document.getElementById('manual-tone').value = bot.behaviorConfig?.tone || ''; document.getElementById('manual-attitude').value = bot.behaviorConfig?.attitude || ''; document.getElementById('manual-prohibited').value = bot.behaviorConfig?.prohibitedTopics?.join(', ') || ''; document.getElementById('memory-container').innerHTML = ''; if (bot.memoryConfig) bot.memoryConfig.forEach(m => addMemoryRow(m.key, m.description, m.type)); document.getElementById('bot-modal').classList.remove('hidden');
+        }
         function switchCreateTab(mode) { document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${mode}`).classList.add('active'); document.getElementById('form-manual').classList.toggle('hidden', mode === 'auto'); document.getElementById('form-auto').classList.toggle('hidden', mode === 'manual'); }
         function addMemoryRow(k = '', d = '', t = 'string') { document.getElementById('memory-container').insertAdjacentHTML('beforeend', `<div class="memory-row"><input class="form-input mem-key" placeholder="Key" value="${k}"><input class="form-input mem-desc" placeholder="Mô tả" value="${d}"><select class="form-input mem-type" style="width:100px;flex:none;"><option value="string" ${t === 'string' ? 'selected' : ''}>Text</option></select><button class="btn-icon" onclick="this.parentElement.remove()" style="color:red"><i class="fa-solid fa-trash"></i></button></div>`); }
         function clearBotForm() { document.getElementById('bot-id').value = ''; document.querySelectorAll('#bot-modal input, #bot-modal textarea').forEach(el => el.value = ''); document.getElementById('memory-container').innerHTML = ''; }
@@ -1686,7 +1690,7 @@
 
             try {
                 const res = await fetch(`${API_URL}/admin/image-template`);
-                 tempImages = await res.json();
+                tempImages = await res.json();
 
                 if (tempImages.length === 0) {
                     grid.innerHTML = '<p style="text-align:center; color:gray; width:100%;">Chưa có template nào.</p>';
@@ -1770,7 +1774,7 @@
 
         // Hàm mở Modal Edit
         function openEditTemplate(t) {
-            const currentTemplate = tempImages.find(item=> item._id == t)
+            const currentTemplate = tempImages.find(item => item._id == t)
             document.getElementById('tman-id').value = currentTemplate._id;
             document.getElementById('tman-name').value = currentTemplate.templateName;
             document.getElementById('tman-code').value = currentTemplate.templateCode;
@@ -1848,7 +1852,10 @@
         // --- ADMIN: KNOWLEDGE & CUSTOMER ---
         let currentKBot = null; let previewData = [];
         function switchKnowledgeTab(mode) { document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`ktab-${mode}`).classList.add('active'); document.getElementById('k-form-manual').classList.toggle('hidden', mode !== 'manual'); document.getElementById('k-form-file').classList.toggle('hidden', mode !== 'file'); document.getElementById('k-form-url').classList.toggle('hidden', mode !== 'url'); }
-        async function openKnowledgeModal(bot) { currentKBot = bot.code; const nameEl = document.getElementById('k-bot-name'); if (nameEl) nameEl.innerText = bot.name; switchKnowledgeTab('manual'); loadKList(); document.getElementById('knowledge-modal').classList.remove('hidden'); }
+        async function openKnowledgeModal(botId) {
+            const bot = bots.find(bot => bot._id == botId)
+            currentKBot = bot.code; const nameEl = document.getElementById('k-bot-name'); if (nameEl) nameEl.innerText = bot.name; switchKnowledgeTab('manual'); loadKList(); document.getElementById('knowledge-modal').classList.remove('hidden');
+        }
         async function loadKList() { const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`); const data = await res.json(); document.getElementById('knowledge-list').innerHTML = data.map(k => `<div class="knowledge-item"><div class="k-content">${k.content}</div><div class="k-keywords">${k.keywords?.join(', ')}</div><div class="k-actions"><button class="btn-icon" onclick="delK('${k._id}')" style="color:red;width:24px;height:24px;"><i class="fa-solid fa-trash"></i></button></div></div>`).join(''); }
         async function addKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: document.getElementById('k-new-content').value, keywords: document.getElementById('k-new-keywords').value.split(',') }) }); document.getElementById('k-new-content').value = ''; loadKList(); }
         async function delK(id) { if (confirm("Xóa?")) { await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' }); loadKList(); } }
@@ -1877,7 +1884,12 @@
             } catch (e) { alert("Err"); } btn.innerText = "Lấy Dữ Liệu"; btn.disabled = false;
         }
         async function saveBulkKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chunks: previewData }) }); alert("Saved!"); document.getElementById('file-preview-area').classList.add('hidden'); loadKList(); }
-        async function openCustomerModal(bot) { const nameEl = document.getElementById('c-bot-name'); if (nameEl) nameEl.innerText = bot.name; const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`); const data = await res.json(); document.getElementById('customer-list-body').innerHTML = data.map(c => `<tr><td>${c.id}</td><td>${new Date(c.lastActive).toLocaleDateString()}</td><td>${JSON.stringify(c.attributes)}</td></tr>`).join(''); document.getElementById('customer-modal').classList.remove('hidden'); }
+        async function openCustomerModal(botId) {
+            const bot = bots.find(bot => bot._id == botId)
+            const nameEl = document.getElementById('c-bot-name');
+            if (nameEl) nameEl.innerText = bot.name;
+            const res = await fetch(`${API_URL}/admin/bots/${bot.code}/customers`); const data = await res.json(); document.getElementById('customer-list-body').innerHTML = data.map(c => `<tr><td>${c.id}</td><td>${new Date(c.lastActive).toLocaleDateString()}</td><td>${JSON.stringify(c.attributes)}</td></tr>`).join(''); document.getElementById('customer-modal').classList.remove('hidden');
+        }
 
         // --- CUSTOMER LOGIC ---
         let currentUserId = null;
@@ -2016,7 +2028,7 @@
 
         // CUSTOMER IMAGE
         let currentTemplate = null;
-  
+
         async function loadCustTemplates() {
             const res = await fetch(`${API_URL}/admin/image-template`); tempImages = await res.json(); document.getElementById('cust-template-list').innerHTML = tempImages.map(t => {
 
