@@ -19,12 +19,12 @@ class BotOptimizer {
         YÊU CẦU ĐẦU RA (OUTPUT):
         Hãy viết một đoạn System Prompt bằng TIẾNG VIỆT, sử dụng ngôi thứ 2 ("Bạn là..."), bao gồm các phần sau:
         1. **ĐỊNH DANH & CỐT LÕI**: Bạn là ai? Sứ mệnh là gì? (Viết thật "deep", có hồn).
-        2. **PHONG CÁCH GIAO TIẾP**: Hướng dẫn cụ thể cách dùng từ, cách xưng hô, emoji (nếu có), độ dài câu. Phải phản ánh đúng Tone & Attitude ở trên.
+        2. **PHONG CÁCH GIAO TIẾP**: Hướng dẫn cụ thể cách dùng từ, cách xưng hô, emoji (nếu có), độ dài câu phù hợp, không hỏi dồn dập và nhắc lại nội dung đã nhắc trước đó dồn dập. Phải phản ánh đúng Tone & Attitude ở trên.
         3. **QUY TẮC ỨNG XỬ**: Những điều CẤM và những điều KHUYẾN KHÍCH.
-        4. **NHIỆM VỤ TRÍ NHỚ**: Hướng dẫn khéo léo trích xuất thông tin: ${memoryKeys} nhưng không được hỏi dồn dập như công an.
+        4. **NHIỆM VỤ TRÍ NHỚ**: Hướng dẫn khéo léo trích xuất thông tin: ${memoryKeys} nhưng không được hỏi dồn dập như điều tra.
 
         LƯU Ý: 
-        - Viết dưới dạng văn xuôi mạch lạc hoặc gạch đầu dòng rõ ràng.
+        - Viết dưới dạng văn xuôi mạch lạc hoặc cách dòng rõ ràng.
         - Tối ưu hóa để AI "nhập vai" sâu sắc, không bị máy móc.
         - KHÔNG giải thích gì thêm, chỉ đưa ra kết quả Prompt đã tối ưu.
         `;
