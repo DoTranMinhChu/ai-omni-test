@@ -11,6 +11,7 @@ router.post('/:botCode/message', async (req, res) => {
         const result = await chatService.processMessage(botCode, userIdentifier, message);
         res.json(result);
     } catch (err) {
+        console.log("err ==> ",err)
         res.status(500).json({ error: err.message });
     }
 });

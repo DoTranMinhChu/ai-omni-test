@@ -23,11 +23,11 @@ class ChatService {
         const [recentMessages, ragChunks] = await Promise.all([
             Message.find({ botCode, customerIdentifier: userIdentifier })
                 .sort({ createdAt: -1 })
-                .limit(15)
+                .limit(10)
                 .lean(), // .lean() giúp query nhanh hơn
             knowledgeRAGService.retrieveContext(bot._id, userMessageContent)
         ]);
-
+        console.log("ragChunks ==> ", ragChunks)
         // Đảo ngược lại message để đúng thứ tự thời gian (Cũ -> Mới) cho Prompt
         const sortedMessages = recentMessages.reverse();
 
@@ -56,7 +56,7 @@ class ChatService {
         const { replyText, extractedData } = this.parseResponse(aiResponseRaw);
 
         // 5. Trả kết quả ngay cho người dùng (Non-blocking)
-        const responseData = { reply: replyText, captured_data: extractedData };
+        const responseData = { reply: replyText, captured_data: { ...(JSON.parse(JSON.stringify(customer.attributes)) || {}), ...extractedData } };
 
         // 6. Xử lý hậu kỳ (Lưu DB, Tóm tắt, Update Profile)
         // Không dùng await ở đây để api phản hồi nhanh
