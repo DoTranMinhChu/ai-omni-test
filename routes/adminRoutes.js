@@ -162,7 +162,7 @@ router.post('/bots/:botCode/knowledge', async (req, res) => {
         if (!bot) return res.status(404).json({ error: "Bot không tồn tại" });
 
         // 2. Tạo Knowledge Chunk
-        const embedding = await knowledgeRAGService.createEmbedding(chunk.content);
+        const embedding = await knowledgeRAGService.createEmbedding(content);
         const chunk = await KnowledgeChunk.create({
             botId: bot._id,
             content: content,

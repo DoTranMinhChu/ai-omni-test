@@ -27,7 +27,7 @@ class ChatService {
                 .lean(), // .lean() giúp query nhanh hơn
             knowledgeRAGService.retrieveContext(bot._id, userMessageContent)
         ]);
-        console.log("ragChunks ==> ",ragChunks)
+
         // Đảo ngược lại message để đúng thứ tự thời gian (Cũ -> Mới) cho Prompt
         const sortedMessages = recentMessages.reverse();
 
