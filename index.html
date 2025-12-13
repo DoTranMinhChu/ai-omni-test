@@ -1885,8 +1885,12 @@
             const fd = new FormData(); fd.append('file', f);
             try {
                 const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, { method: 'POST', body: fd }); const data = await res.json();
-                if (data.success) { previewData = data.previewChunks; document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join(''); document.getElementById('file-preview-area').classList.remove('hidden'); }
-            } catch (e) { alert("Err"); } btn.innerText = "Phân tích"; btn.disabled = false;
+                if (data.success) {
+                    previewData = data.previewChunks;
+                    document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join('');
+                    document.getElementById('file-preview-area').classList.remove('hidden');
+                }
+            } catch (e) { console.log(e); } btn.innerText = "Phân tích"; btn.disabled = false;
         }
         // Upload URL Logic
         async function processUrl() {
@@ -1897,10 +1901,14 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url })
                 });
                 const data = await res.json();
-                if (data.success) { previewData = data.previewChunks; document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join(''); document.getElementById('file-preview-area').classList.remove('hidden'); }
+                if (data.success) {
+                    previewData = data.previewChunks;
+                    document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join('');
+                    document.getElementById('file-preview-area').classList.remove('hidden');
+                }
 
-                if (data.success) renderPreview(data.previewChunks); else alert(data.error);
-            } catch (e) { alert("Err"); } btn.innerText = "Lấy Dữ Liệu"; btn.disabled = false;
+                // if (data.success) renderPreview(data.previewChunks);
+            } catch (e) { console.log(e); } btn.innerText = "Lấy Dữ Liệu"; btn.disabled = false;
         }
         async function saveBulkKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chunks: previewData }) }); alert("Saved!"); document.getElementById('file-preview-area').classList.add('hidden'); loadKList(); }
         async function openCustomerModal(botId) {
