@@ -186,10 +186,13 @@ router.post('/bots/:botCode/knowledge', async (req, res) => {
 // [GET] Xem danh sách tri thức của Bot
 router.get('/bots/:botCode/knowledge', async (req, res) => {
     try {
+     
         const bot = await Bot.findOne({ code: req.params.botCode });
+
         if (!bot) return res.status(404).json({ error: "Bot không tồn tại" });
 
         const knowledge = await KnowledgeChunk.find({ botId: bot._id }).sort({ createdAt: -1 });
+   
         res.json(knowledge);
     } catch (err) {
         res.status(500).json({ error: err.message });

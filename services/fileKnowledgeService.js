@@ -161,7 +161,11 @@ class FileKnowledgeService {
         if (!rawText || rawText.trim().length < 50) return [];
 
         // 1) Pre-clean: remove common headers/footers (số trang, header của site...). Đây là heuristic.
-        const cleaned = this._cleanHeadersFooters(rawText);
+        const cleanedStep1 = this._cleanHeadersFooters(rawText);
+
+
+        // 1.5) **MỚI:** Loại bỏ base64 và dữ liệu rác
+        const cleaned = this._removeNoiseAndGarbage(cleanedStep1);
 
         // 2) Split by headings / section markers first (nếu có)
         const sectionCandidates = this._splitByHeadings(cleaned);
@@ -248,12 +252,37 @@ class FileKnowledgeService {
 
     _cleanHeadersFooters(text) {
         // Loại bỏ lines kiểu "Page 1 of 10" hoặc "Trang 1/10" hoặc header heavy
+        // Giữ lại các regex làm sạch cũ
         return text
             .replace(/\n?Page\s*\d+\s*(of\s*\d+)?\s*\n?/ig, '\n')
             .replace(/\n?Trang\s*\d+\/\d+\s*\n?/ig, '\n')
             .replace(/\r\n/g, '\n')
             .replace(/\t/g, ' ')
             .replace(/[ ]{2,}/g, ' ');
+    }
+
+    _removeNoiseAndGarbage(text) {
+        // Regex để tìm kiếm các chuỗi base64 dài (thường do hình ảnh/binary không được xử lý)
+        // Đây là regex heuristic, tìm chuỗi ít nhất 50 ký tự A-Za-z0-9+/=
+        // Lưu ý: Có thể cần điều chỉnh độ dài tối thiểu (50) tùy theo dữ liệu thực tế.
+        const base64Regex = /([A-Za-z0-9+/=]{50,})[\s\n]*/g;
+
+        let cleaned = text.replace(base64Regex, (match, p1) => {
+            // Chỉ loại bỏ nếu chuỗi không phải là một đoạn code hợp lý (heuristic)
+            if (p1.length > 100 && !p1.includes(' ')) {
+                console.log(`[Cleaner] Đã loại bỏ chuỗi base64 dài (len: ${p1.length})`);
+                return '\n'; // Thay thế bằng xuống dòng để tránh dính liền nội dung
+            }
+            return match; // Giữ lại nếu là chuỗi ngắn hoặc có vẻ là code
+        });
+
+        // Loại bỏ các ký tự điều khiển/ASCII không in được (trừ \n)
+        cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+        // Loại bỏ các dòng chỉ chứa ký tự rác/đánh dấu không liên quan
+        cleaned = cleaned.split('\n').filter(line => line.trim().length > 3 || line.trim().length === 0).join('\n');
+
+        return cleaned;
     }
 
     _splitByHeadings(text) {
@@ -294,21 +323,22 @@ class FileKnowledgeService {
         const prompt = `
 Bạn là một extractor chuyên nghiệp cho tri thức (RAG).
 NHIỆM VỤ: Từ đoạn văn bản dưới đây, trích xuất các mẩu tri thức độc lập (nếu có). Mỗi mẩu tri thức nên mô tả 1 "entity" hoặc 1 fact hoàn chỉnh.
-YÊU CẦU CHẤT LƯỢNG:
+YÊU CẦU CHẤT LƯỢNG VÀ HÌNH THỨC:
 1) PHẢI TRẢ VỀ **CHỈ** 1 MẢNG JSON (JSON array). KHÔNG NÓI THÊM, KHÔNG GIẢI THÍCH.
-2) Mỗi phần tử trong mảng có định dạng:
+2) MỖI MẢNH TRI THỨC PHẢI **BẢO TOÀN Ý NGHĨA và TÍNH CHÍNH XÁC CAO** so với nội dung gốc. Đừng tóm tắt quá ngắn làm mất đi ngữ cảnh quan trọng.
+3) NẾU ĐOẠN VĂN BẢN CHỨA DỮ LIỆU RÁC (ví dụ: chuỗi mã hóa base64 dài, mã HTML bị lỗi, ký tự không liên quan, hoặc chỉ là footer/header rỗng) -> **KHÔNG TRÍCH XUẤT** và trả về **[]** (mảng rỗng).
+4) Mỗi phần tử trong mảng có định dạng:
    {
      "entityId": "chuỗi định danh tiêu chuẩn (nếu có thể, đặt tên canonical — ví dụ: 'Công ty ABC', hoặc 'Sản phẩm XYZ' — nếu không biết, để rỗng string)",
      "title": "Tiêu đề ngắn tóm tắt mẩu tri thức",
-     "content": "Nội dung chi tiết (1-4 câu) mô tả mẩu tri thức này. Không bao gồm thông tin thừa như số trang, header, footer.",
+     "content": "Nội dung chi tiết (1-4 câu) mô tả mẩu tri thức này. PHẢI ĐỦ Ý, không bao gồm thông tin thừa như số trang, header, footer.",
      "keywords": ["từ khóa 1", "từ khóa 2"],
      "type": "entity" | "fact" | "table",
      "confidence": 0.0  // Giá trị 0..1 do model estimate (tùy chọn)
    }
 
-3) Nếu thấy bảng (table), cố gắng chuyển sang JSON hoặc mô tả bảng bằng list.
-4) Nếu thông tin thuộc cùng 1 entity xuất hiện nhiều chunk, đảm bảo entityId nhất quán (đặt canonical name).
-5) Tránh cắt nửa câu — tóm tắt đầy đủ ý trong 'content'.
+5) Nếu thấy bảng (table), cố gắng chuyển sang JSON hoặc mô tả bảng bằng list.
+6) Nếu thông tin thuộc cùng 1 entity xuất hiện nhiều chunk, đảm bảo entityId nhất quán (đặt canonical name).
 
 INPUT:
 """

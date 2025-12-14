@@ -1420,8 +1420,11 @@
                     <div class="flex gap-4">
                         <div class="form-group w-full"><label class="form-label">Tên Bot</label><input type="text"
                                 id="auto-name" class="form-input"></div>
-                        <div class="form-group w-full"><label class="form-label">Mã Code</label><input type="text"
-                                id="auto-code" class="form-input"></div>
+                        <div class="form-group w-full">
+                            <label class="form-label">Mã Code</label>
+                            <input type="text" id="auto-code" class="form-input"
+                                oninput="this.value = this.value.replace(/\s/g, '')">
+                        </div>
                     </div>
                 </div>
 
@@ -1430,8 +1433,11 @@
                     <div class="flex gap-4">
                         <div class="form-group w-full"><label class="form-label">Tên Bot *</label><input type="text"
                                 id="manual-name" class="form-input"></div>
-                        <div class="form-group w-full"><label class="form-label">Mã Code (Unique) *</label><input
-                                type="text" id="manual-code" class="form-input"></div>
+                        <div class="form-group w-full">
+                            <label class="form-label">Mã Code (Unique) *</label>
+                            <input type="text" id="manual-code" class="form-input"
+                                oninput="this.value = this.value.replace(/\s/g, '')">
+                        </div>
                     </div>
                     <div class="form-group"><label class="form-label">System Prompt (Cốt lõi) *</label><textarea
                             id="manual-prompt" class="form-input"></textarea></div>
@@ -1564,6 +1570,8 @@
                                 onclick="addKnowledge()">Thêm</button></div>
                     </div>
                 </div>
+
+
                 <div id="k-form-file" class="hidden">
                     <div
                         style="background: #eff6ff; padding: 20px; border-radius: 8px; border: 1px dashed #6366f1; text-align: center; margin-bottom: 20px;">
@@ -1578,10 +1586,11 @@
 
 
                     <div id="file-preview-area" class="hidden">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Kết quả:
-                                <span id="preview-count">0</span></span><button class="btn btn-primary"
-                                onclick="saveBulkKnowledge()">Lưu Tất Cả</button></div>
-                        <div id="preview-list" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <span>Kết quả: <span id="file-preview-count">0</span></span>
+                            <button class="btn btn-primary" onclick="saveBulkKnowledge()">Lưu Tất Cả</button>
+                        </div>
+                        <div id="preview-list-form-file" style="max-height: 300px; overflow-y: auto;"></div>
                     </div>
                 </div>
                 <div id="k-form-url" class="hidden">
@@ -1594,6 +1603,13 @@
                                     Liệu</button>
                             </div>
                         </div>
+                    </div>
+                    <div id="url-preview-area" class="hidden">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <span>Kết quả: <span id="url-preview-count">0</span></span>
+                            <button class="btn btn-primary" onclick="saveBulkKnowledge()">Lưu Tất Cả</button>
+                        </div>
+                        <div id="preview-list-form-url" style="max-height: 300px; overflow-y: auto;"></div>
                     </div>
                 </div>
                 <div id="knowledge-list"></div>
@@ -1688,19 +1704,71 @@
         function switchCreateTab(mode) { document.querySelectorAll('#bot-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${mode}`).classList.add('active'); document.getElementById('form-manual').classList.toggle('hidden', mode === 'auto'); document.getElementById('form-auto').classList.toggle('hidden', mode === 'manual'); }
         function addMemoryRow(k = '', d = '', t = 'string') { document.getElementById('memory-container').insertAdjacentHTML('beforeend', `<div class="memory-row"><input class="form-input mem-key" placeholder="Key" value="${k}"><input class="form-input mem-desc" placeholder="Mô tả" value="${d}"><select class="form-input mem-type" style="width:100px;flex:none;"><option value="string" ${t === 'string' ? 'selected' : ''}>Text</option></select><button class="btn-icon" onclick="this.parentElement.remove()" style="color:red"><i class="fa-solid fa-trash"></i></button></div>`); }
         function clearBotForm() { document.getElementById('bot-id').value = ''; document.querySelectorAll('#bot-modal input, #bot-modal textarea').forEach(el => el.value = ''); document.getElementById('memory-container').innerHTML = ''; }
+        // JAVASCRIPT (PHẦN THAY THẾ CHO HÀM submitBotForm)
+
+        // ... (các hàm khác) ...
+
         async function submitBotForm() {
+            const btn = document.getElementById('btn-save-bot');
+            const originalText = btn.innerText;
+
+            // 1. Khóa nút và hiển thị loading
+            btn.innerText = "Đang lưu...";
+            btn.disabled = true;
+
             const isAuto = !document.getElementById('form-auto').classList.contains('hidden');
             const url = isAuto ? `${API_URL}/admin/bots/auto-generate` : `${API_URL}/admin/bots${isEditMode ? '/' + document.getElementById('bot-id').value : ''}`;
             const method = isAuto || !isEditMode ? 'POST' : 'PUT';
             let payload = {};
-            if (isAuto) payload = { description: document.getElementById('auto-desc').value, name: document.getElementById('auto-name').value, code: document.getElementById('auto-code').value };
-            else {
-                const mems = []; document.querySelectorAll('.memory-row').forEach(r => { const k = r.querySelector('.mem-key').value; if (k) mems.push({ key: k, description: r.querySelector('.mem-desc').value, type: r.querySelector('.mem-type').value }); });
-                payload = { name: document.getElementById('manual-name').value, code: document.getElementById('manual-code').value, systemPrompt: document.getElementById('manual-prompt').value, behaviorConfig: { tone: document.getElementById('manual-tone').value, attitude: document.getElementById('manual-attitude').value, prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').filter(s => s) }, memoryConfig: mems };
+
+            if (isAuto) {
+                payload = { description: document.getElementById('auto-desc').value, name: document.getElementById('auto-name').value, code: document.getElementById('auto-code').value };
+            } else {
+                const mems = [];
+                document.querySelectorAll('.memory-row').forEach(r => {
+                    const k = r.querySelector('.mem-key').value;
+                    if (k) mems.push({ key: k, description: r.querySelector('.mem-desc').value, type: r.querySelector('.mem-type').value });
+                });
+
+                payload = {
+                    name: document.getElementById('manual-name').value,
+                    code: document.getElementById('manual-code').value,
+                    systemPrompt: document.getElementById('manual-prompt').value,
+                    behaviorConfig: {
+                        tone: document.getElementById('manual-tone').value,
+                        attitude: document.getElementById('manual-attitude').value,
+                        prohibitedTopics: document.getElementById('manual-prohibited').value.split(',').filter(s => s)
+                    },
+                    memoryConfig: mems
+                };
             }
-            await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            closeModal('bot-modal'); loadAdminBots();
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    closeModal('bot-modal');
+                    loadAdminBots();
+                    alert("Bot đã được lưu thành công.");
+                } else {
+                    const errorData = await res.json();
+                    alert("Lỗi khi lưu Bot: " + (errorData.message || res.statusText));
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Lỗi kết nối server.");
+            } finally {
+                // 2. Mở khóa nút và khôi phục text
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
+
+        // ... (các hàm khác) ...
 
         // --- ADMIN: IMAGE TEMPLATE ---
         async function loadAdminTemplates() {
@@ -1870,47 +1938,146 @@
         }
         // --- ADMIN: KNOWLEDGE & CUSTOMER ---
         let currentKBot = null; let previewData = [];
-        function switchKnowledgeTab(mode) { document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active')); document.getElementById(`ktab-${mode}`).classList.add('active'); document.getElementById('k-form-manual').classList.toggle('hidden', mode !== 'manual'); document.getElementById('k-form-file').classList.toggle('hidden', mode !== 'file'); document.getElementById('k-form-url').classList.toggle('hidden', mode !== 'url'); }
+        function switchKnowledgeTab(mode) {
+            document.querySelectorAll('#knowledge-modal .tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`ktab-${mode}`).classList.add('active');
+            document.getElementById('k-form-manual').classList.toggle('hidden', mode !== 'manual');
+            document.getElementById('k-form-file').classList.toggle('hidden', mode !== 'file');
+            document.getElementById('k-form-url').classList.toggle('hidden', mode !== 'url');
+        }
         async function openKnowledgeModal(botId) {
             const bot = bots.find(bot => bot._id == botId)
-            currentKBot = bot.code; const nameEl = document.getElementById('k-bot-name'); if (nameEl) nameEl.innerText = bot.name; switchKnowledgeTab('manual'); loadKList(); document.getElementById('knowledge-modal').classList.remove('hidden');
+            currentKBot = bot.code; const nameEl = document.getElementById('k-bot-name'); if (nameEl) nameEl.innerText = bot.name;
+            switchKnowledgeTab('manual'); loadKList(); document.getElementById('knowledge-modal').classList.remove('hidden');
         }
         async function loadKList() { const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`); const data = await res.json(); document.getElementById('knowledge-list').innerHTML = data.map(k => `<div class="knowledge-item"><div class="k-content">${k.content}</div><div class="k-keywords">${k.keywords?.join(', ')}</div><div class="k-actions"><button class="btn-icon" onclick="delK('${k._id}')" style="color:red;width:24px;height:24px;"><i class="fa-solid fa-trash"></i></button></div></div>`).join(''); }
         async function addKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: document.getElementById('k-new-content').value, keywords: document.getElementById('k-new-keywords').value.split(',') }) }); document.getElementById('k-new-content').value = ''; loadKList(); }
         async function delK(id) { if (confirm("Xóa?")) { await fetch(`${API_URL}/admin/knowledge/${id}`, { method: 'DELETE' }); loadKList(); } }
         function handleFileSelect() { const f = document.getElementById('k-file-input').files[0]; if (f) { document.getElementById('file-name-display').innerText = f.name; document.getElementById('btn-process-file').classList.remove('hidden'); } }
         async function uploadAndProcessFile() {
-            const f = document.getElementById('k-file-input').files[0]; if (!f) return;
-            const btn = document.getElementById('btn-process-file'); btn.innerText = "Running..."; btn.disabled = true;
-            const fd = new FormData(); fd.append('file', f);
+            const f = document.getElementById('k-file-input').files[0];
+            if (!f) return;
+            const btn = document.getElementById('btn-process-file');
+            const originalText = btn.innerText;
+
+            btn.innerText = "Đang xử lý...";
+            btn.disabled = true;
+
+            const fd = new FormData();
+            fd.append('file', f);
+
             try {
-                const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, { method: 'POST', body: fd }); const data = await res.json();
+                const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/upload`, { method: 'POST', body: fd });
+                const data = await res.json();
+
                 if (data.success) {
-                    previewData = data.previewChunks;
-                    document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join('');
+                    previewData = data.previewChunks || [];
+                    const listContainer = document.getElementById('preview-list-form-file');
+                    const countEl = document.getElementById('file-preview-count');
+
+                    listContainer.innerHTML = previewData.map((it, i) => `
+                        <div class="knowledge-item">
+                            <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 5px;">${it.title || `Chunk ${i + 1}`}</h4>
+                            <textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea>
+                            <input type="text" class="form-input" style="font-size:0.8rem; margin-top:5px;" value="${it.keywords?.join(', ') || ''}" placeholder="Từ khóa (Chỉnh sửa được)">
+                        </div>
+                    `).join('');
+
+                    countEl.innerText = previewData.length;
                     document.getElementById('file-preview-area').classList.remove('hidden');
+
+                } else {
+                    alert("Lỗi phân tích file: " + (data.message || "Không rõ"));
                 }
-            } catch (e) { console.log(e); } btn.innerText = "Phân tích"; btn.disabled = false;
+
+            } catch (e) {
+                console.error(e);
+                alert("Lỗi kết nối server.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
         // Upload URL Logic
         async function processUrl() {
-            const url = document.getElementById('k-url-input').value; if (!url) return alert("Nhập URL");
-            const btn = document.getElementById('btn-process-url'); btn.innerText = "Fetching..."; btn.disabled = true;
+            const url = document.getElementById('k-url-input').value;
+            if (!url) return alert("Nhập URL");
+
+            const btn = document.getElementById('btn-process-url');
+            const originalText = btn.innerText;
+
+            btn.innerText = "Đang cào dữ liệu...";
+            btn.disabled = true;
+
             try {
                 const res = await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/url`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url })
                 });
+
                 const data = await res.json();
+
                 if (data.success) {
-                    previewData = data.previewChunks;
-                    document.getElementById('preview-list').innerHTML = previewData.map((it, i) => `<div class="knowledge-item"><textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea></div>`).join('');
-                    document.getElementById('file-preview-area').classList.remove('hidden');
+                    previewData = data.previewChunks || [];
+                    const listContainer = document.getElementById('preview-list-form-url');
+                    const countEl = document.getElementById('url-preview-count'); // Sử dụng ID đã sửa
+
+                    listContainer.innerHTML = previewData.map((it, i) => `
+                        <div class="knowledge-item">
+                            <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 5px;">${it.title || `Chunk ${i + 1}`}</h4>
+                            <textarea class="form-input" style="font-size:0.8rem" onchange="previewData[${i}].content=this.value">${it.content}</textarea>
+                            <input type="text" class="form-input" style="font-size:0.8rem; margin-top:5px;" value="${it.keywords?.join(', ') || ''}" placeholder="Từ khóa (Chỉnh sửa được)">
+                        </div>
+                    `).join('');
+
+                    countEl.innerText = previewData.length;
+                    document.getElementById('url-preview-area').classList.remove('hidden');
+
+                } else {
+                    alert("Lỗi cào dữ liệu/phân tích URL: " + (data.message || "Không rõ"));
                 }
 
-                // if (data.success) renderPreview(data.previewChunks);
-            } catch (e) { console.log(e); } btn.innerText = "Lấy Dữ Liệu"; btn.disabled = false;
+
+            } catch (e) {
+                console.error(e);
+                alert("Lỗi kết nối server.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
-        async function saveBulkKnowledge() { await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chunks: previewData }) }); alert("Saved!"); document.getElementById('file-preview-area').classList.add('hidden'); loadKList(); }
+
+        // HÀM LƯU TẤT CẢ (Giờ đã lấy được từ khóa/title từ AI)
+        async function saveBulkKnowledge() {
+            if (!previewData || previewData.length === 0) return alert("Không có tri thức để lưu.");
+
+            // Cập nhật lại keywords (từ các input) trước khi lưu
+            const activeTab = document.querySelector('#knowledge-modal .tab-item.active').id;
+            const listContainerId = activeTab === 'ktab-file' ? 'preview-list-form-file' : 'preview-list-form-url';
+
+            document.querySelectorAll(`#${listContainerId} .knowledge-item`).forEach((itemEl, i) => {
+                const keywordInput = itemEl.querySelector('input[type="text"]');
+                const contentTextarea = itemEl.querySelector('textarea');
+
+                if (keywordInput && previewData[i]) {
+                    // Cập nhật content và keywords
+                    previewData[i].content = contentTextarea.value;
+                    previewData[i].keywords = keywordInput.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                }
+            });
+
+            await fetch(`${API_URL}/admin/bots/${currentKBot}/knowledge/bulk`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chunks: previewData.filter(c => c.content && c.content.trim().length > 50) }) // Chỉ lưu chunks có nội dung dài hơn 50 ký tự
+            });
+
+            alert("Đã lưu thành công " + previewData.length + " chunks!");
+
+            document.getElementById('file-preview-area').classList.add('hidden');
+            document.getElementById('url-preview-area').classList.add('hidden');
+
+            loadKList(); // Tải lại danh sách tri thức đã lưu
+        }
         async function openCustomerModal(botId) {
             const bot = bots.find(bot => bot._id == botId)
             const nameEl = document.getElementById('c-bot-name');
